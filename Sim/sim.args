@@ -1,0 +1,13 @@
+-clean
+-ieee1364
+-v93
+-nospecify
+-timescale 1ns/1ps
+-mess
+-access +rwc
+-sv
+
+# provide path to rtl file
+
+# example = /afs/ece.cmu.edu/usr/pvellais/Private/New_DATE/RTL/tb_std/column_tb_431x2.sv
+

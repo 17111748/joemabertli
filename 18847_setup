@@ -1,0 +1,17 @@
+#########################################################################
+#                    18-847 CADENCE TOOLS                               #
+######################################################################### 
+
+# Genus Synthesis Solution
+export GENUS_PATH=/afs/ece.cmu.edu/support/cds/share/image/usr/cds/genus-19.15.000/tools.lnx86
+
+# Cadence Conformal - logic equivalence checker
+export LEC_DIR=/afs/ece.cmu.edu/support/cds/share/image/usr/cds/confrml-18.10.300/tools.lnx86
+
+# Cadence Xcelium - gate-level simulation
+export XCEL_PATH=/afs/ece.cmu.edu/support/cds/share/image/usr/cds/xcelium-19.03.010/tools.lnx86
+
+export PATH=${GENUS_PATH}/bin:${LEC_DIR}/bin:${XCEL_PATH}/bin:${PATH}
+
+# License File
+export LM_LICENSE_FILE=/afs/ece/support/cds/share/image/usr/cds/soc/license.dat
