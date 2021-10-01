@@ -1,3 +1,5 @@
+set DUT unary_shift_mac
+set DUT_TB unary_shift_mac_tb
 #### Template Script for RTL->Gate-Level Flow (generated from GENUS 18.14-s037_1) 
 
 if {[file exists /proc/cpuinfo]} {
@@ -16,7 +18,7 @@ puts "Hostname : [info hostname]"
 #set THRES 13
 
 # top-level module name
-set DESIGN column
+set DESIGN $DUT
 set GEN_EFF high
 set MAP_OPT_EFF high
 set DATE [clock format [clock seconds] -format "%b%d-%T"] 
@@ -25,14 +27,14 @@ set _REPORTS_PATH ./report/
 set _LOG_PATH ./log/
 
 # specify vcd file path (can also replace vcd with tcf)
-set vcd_file /afs/ece.cmu.edu/usr/pvellais/Private/New_DATE/Sim/rtl/std/column82x2.vcd
+set vcd_file ../Src/tb/unary_shift_tb.vcd
 
 # Change! paths to asap7 lib and lef folder
-set_db / .init_lib_search_path {/afs/ece.cmu.edu/usr/pvellais/Private/ASAP7/ASAP7_PDKandLIB_v1p6/lib_release_191006/asap7_7p5t_library/rev25/LIB/CCS/ /afs/ece.cmu.edu/usr/pvellais/Private/ASAP7/ASAP7_PDKandLIB_v1p6/lib_release_191006/asap7_7p5t_library/rev25/LEF/}
+set_db / .init_lib_search_path {../asap7_dir/}
 # Change! path to tcl script
-set_db / .script_search_path {/afs/ece.cmu.edu/usr/pvellais/Private/New_DATE/Synth/new_tcl/}
+set_db / .script_search_path {./}
 # Change! rtl path
-set_db / .init_hdl_search_path {/afs/ece.cmu.edu/usr/pvellais/Private/New_DATE/RTL/src_original/} 
+set_db / .init_hdl_search_path {../Src/rtl} 
 
 set_db / .information_level 7 
 
@@ -57,7 +59,9 @@ read_physical -lef " \
 "
 
 # Change! path to qrcTech
-read_qrc /afs/ece.cmu.edu/usr/pvellais/Private/ASAP7/ASAP7_PDKandLIB_v1p6/lib_release_191006/asap7_7p5t_library/rev25/qrc/qrcTechFile_typ03_scaled4xV06
+# read_qrc /afs/ece.cmu.edu/usr/pvellais/Private/ASAP7/ASAP7_PDKandLIB_v1p6/lib_release_191006/asap7_7p5t_library/rev25/qrc/qrcTechFile_typ03_scaled4xV06
+# TODO
+read_qrc ./qrcTechFile_typ03_scaled4xV06 
 set_db / .hdl_generate_index_style %s_%d_
 set_db / .lp_insert_clock_gating false
 set_db / .hdl_track_filename_row_col true 
@@ -67,7 +71,7 @@ set_db / .hdl_track_filename_row_col true
 ## Load Design
 ####################################################################
 # Change! specify rtl files to synthesize
-read_hdl -language sv "adder.sv  edge2pulse.sv incdec.sv neuron_body.sv pac.sv stdp_case_gen.sv wta.sv column82x2.sv  flogic.sv fsm_simple.sv  less_equal.sv  neuron_rnl_ptt.sv  pulse2edge.sv  stdp.sv fsm_synapse.sv "
+read_hdl -language sv "pipo_shift.sv sipo_shift.sv unary_adder.sv unary_shift_multiplier.sv serial_stack.sv siso_shift.sv unary_shift_mac.sv"
 elaborate $DESIGN
 puts "Runtime & Memory after 'read_hdl'"
 time_info Elaboration
@@ -79,7 +83,7 @@ check_design -unresolved
 ####################################################################
 
 # Change! sdc file name (should be inside folder with tcl script)
-read_sdc chip.sdc
+read_sdc chip_new.sdc
 puts "The number of exceptions is [llength [vfind "$DESIGN" -exception *]]"
 
 if {![file exists ${_LOG_PATH}]} {
@@ -125,7 +129,7 @@ foreach cg [vfind / -cost_group *] {
 ####################################################################
 
 # Change! DUT name
-read_vcd $vcd_file -vcd_scope column_tb/DUT
+read_vcd $vcd_file -vcd_scope $DUT_TB/dut
 
 ####################################################################
 ## Power Constraints Setup
@@ -199,7 +203,7 @@ write_sdc > ${_OUTPUTS_PATH}/${DESIGN}_m.sdc
 write_sdf -timescale ns -precision 3 > ${_OUTPUTS_PATH}/${DESIGN}_m.sdf
 
 # Change! DUT name
-read_vcd $vcd_file -vcd_scope column_tb/DUT
+read_vcd $vcd_file -vcd_scope $DUT_TB/DUT
 report_power > $_REPORTS_PATH/${DESIGN}_power.rpt
 
 #################################

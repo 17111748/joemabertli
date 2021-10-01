@@ -9,5 +9,6 @@
 
 # provide path to rtl file
 
-# example = /afs/ece.cmu.edu/usr/pvellais/Private/New_DATE/RTL/tb_std/column_tb_431x2.sv
+../Src/tb/unary_shift_mac_tb.sv
+../Src/rtl/*.sv
 
