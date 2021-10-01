@@ -5,6 +5,8 @@
  *
  * Inputs:
  *   - x                          Value to load into the counter.
+ *                                If x is positive, it will be negated before
+ *                                flopping it into the counter.
  *   - load_x                     Valid bit to guard x.
  *   - en                         Enables counter increment.
  *                                If en and load_x are high at the same time,
@@ -30,12 +32,16 @@ module counter_to_0 #(
     logic  count_en;
     assign count_en = (y != 'b0) && en;
 
+    logic [WIDTH - 1:0] counter_in;
+
+    assign counter_in = (x[WIDTH - 1]) ? x : ~x + 'b1;
+
     counter #(
         .WIDTH  (WIDTH)
     ) zero_counter (
         .clk      (clk),
         .reset_n  (reset_n),
-        .x        (x),
+        .x        (counter_in),
         .load_x   (load_x),
         .en       (count_en),
         .y        (y)
