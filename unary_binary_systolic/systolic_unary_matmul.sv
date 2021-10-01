@@ -73,7 +73,11 @@ endmodule
 
 // Systolic_node that has the AND gates and adder tree 
 module systolic_node #(
-    parameter SIZE = 4 
+    parameter SIZE = 4, 
+    parameter A_ROW = 2,
+    parameter A_COL = 2,
+    parameter B_ROW = A_COL,  
+    parameter B_COL = 2 
 ) (
     input  logic clk, 
     input  logic reset_n, 
@@ -81,7 +85,7 @@ module systolic_node #(
     input  logic unary_A, 
     input  logic [SIZE-1:0] binary_B, // TODO: ensure this is always_asserted
     input  logic [(SIZE<<1)+A_COL-1:0] intermediate_data, 
-    output logic [(SIZE<<1)+A_COL-1:0] output, 
+    output logic [(SIZE<<1)+A_COL-1:0] out 
 ); 
 
     logic [(1<<SIZE)-1:0] unary_out; 
@@ -100,13 +104,13 @@ module systolic_node #(
 
     always_ff@(posedge clk, negedge reset_n) begin 
         if(~reset_n) begin  
-            output <= 1'b0; 
+            out <= 1'b0; 
         end 
         else if (data_clk) begin 
-            output <= intermediate_data; 
+            out <= intermediate_data; 
         end 
         else begin 
-            output <= output + at_out;
+            out <= out + adder_tree_out;
         end  
     end 
 
@@ -133,7 +137,7 @@ module systolic_unary_matmul #(
     logic [SIZE:0] counter_out; 
     logic [SIZE-1:0] A_comparator_in [A_COL]; 
     logic [B_ROW-1:0] unary_A_comparator_out; 
-    logic [B_ROW-1:0] unary_A [B_COL]; // unary signal that comes into the systolic structure (transpose of B)
+    logic [B_COL-1:0][B_ROW-1:0] unary_A; // unary signal that comes into the systolic structure (transpose of B)
 
     logic data_clk; // asserts high 2^b + constant clock cycles
     assign data_clk = (counter_out == ((1<<SIZE) + 1));
@@ -147,41 +151,15 @@ module systolic_unary_matmul #(
     genvar i; 
     generate 
         for (i = 0; i < A_COL; i=i+1) begin 
-            Comparator #(.WIDTH(SIZE+1)) comparator_A(.counter(counter_out), .A(A_comparator_in[i]), .lessThanOrEqual(unary_A_comparator_out[i]));  
+            Comparator #(.WIDTH(SIZE+1)) comparator_A(.counter(counter_out), .A({1'b0, A_comparator_in[i]}), .lessThanOrEqual(unary_A_comparator_out[i]));  
         end 
     endgenerate
- 
     
-
-    // TODO: Combinational logic with clocking to determine A_comparator_in (systolic flow into the comparator)
-    // Scheduling the A as inputs 
-    genvar j;
-    generate
-        for (j = 0; j < A_COL; j++) begin
-            if ((data_clk_count > j) && (data_clk_count - j < A_ROW)) begin
-                A_comparator_in[j] = A[data_clk_count - j][j]; // TODO: store A and B in registers
-            end
-            else begin
-                A_comparator_in[j] = (WIDTH)'('d0);
-            end
-        end
-    endgenerate
-
-
-    // TODO: Combinational logic with clocking to assign the last output of intermediate_data to the C
-    // Scheduling the C as outputs
-    genvar k;
-    generate
-        for (k = 0; k < A_COL; k++) begin
-            // Check th
-            if (data_clk_count == A_COL )
-        end
-    endgenerate
-
-
     // Intermediate data pipeline wires 
-    logic [(SIZE<<1)+A_COL-1:0] intermediate_data_cur  [B_ROW+1][B_COL];
-    logic [(SIZE<<1)+A_COL-1:0] intermediate_data_next [B_ROW][B_COL];
+    // logic [(SIZE<<1)+A_COL-1:0] intermediate_data_cur  [B_ROW+1][B_COL];
+    // logic [(SIZE<<1)+A_COL-1:0] intermediate_data_next [B_ROW][B_COL];
+    logic [B_ROW:0][B_COL-1:0][(SIZE<<1)+A_COL-1:0] intermediate_data_cur;
+    logic [B_ROW-1:0][B_COL-1:0][(SIZE<<1)+A_COL-1:0] intermediate_data_next;
 
     
     // Instantiate the systolic_nodes (B)
@@ -189,12 +167,46 @@ module systolic_unary_matmul #(
     generate 
         for (b_row = 0; b_row < B_ROW; b_row=b_row+1) begin 
             for (b_col = 0; b_col < B_COL; b_col=b_col+1) begin 
-                systolic_node #(.SIZE(SIZE)) systolic_nodes(.clk(clk), .reset_n(reset_n), .data_clk(data_clk), .unary_A(unary_A[b_col][b_row]), 
-                                                            .binary_B(B[b_row][b_col]), .intermediate_data(intermediate_data_cur[b_row][b_col]), .output(intermediate_data_next[b_row][b_col])); 
+                systolic_node #(.SIZE(SIZE), .A_ROW(A_ROW), .A_COL(A_COL), .B_ROW(B_ROW), .B_COL(B_COL)) systolic_nodes
+                               (.clk(clk), .reset_n(reset_n), .data_clk(data_clk), .unary_A(unary_A[b_col][b_row]), 
+                                .binary_B(B[b_row][b_col]), .intermediate_data(intermediate_data_cur[b_row][b_col]), 
+                                .out(intermediate_data_next[b_row][b_col])); 
             end 
         end 
     endgenerate 
 
+    
+
+    // TODO: Combinational logic with clocking to determine A_comparator_in (systolic flow into the comparator)
+    // Scheduling the A as inputs 
+    always_comb begin 
+        for (int j = 0; j < A_COL; j+=1) begin
+            if ((data_clk_count > j) && ((data_clk_count - j) < A_ROW)) begin
+                A_comparator_in[j] = A[(data_clk_count - j)][j]; // TODO: store A and B in registers
+            end
+            else begin
+                A_comparator_in[j] = (SIZE)'('d0);
+            end
+        end
+    end 
+
+    // TODO: Combinational logic with clocking to assign the last output of intermediate_data to the C
+    // Scheduling the C as outputs
+    always_comb begin 
+        for (int m = 0; m < A_ROW; m+=1) begin
+            for (int n = 0; n < A_COL; n+=1) begin
+                if (data_clk_count == (m + n + A_COL)) begin
+                    C[m][n] = intermediate_data_next[B_ROW - 1][n]; // TODO: this should be loaded into a register; we can combinationally make this the register D input and enable the register at the same time
+                end
+                else begin
+                    C[m][n] = ((SIZE<<1)+A_COL)'('d0);
+                end
+            end
+        end
+    end
+
+
+    
     // Pipeline for unary signal A (left to right)
     always_ff @(posedge clk, negedge reset_n) begin 
         if (~reset_n) begin 
