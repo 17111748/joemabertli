@@ -22,7 +22,7 @@ module incrementer #(
     output logic [WIDTH - 1:0] x_plus_1
 );
 
-    logic [WIDTH - 1:0] c;
+    logic [WIDTH:0] c;
     assign c[0] = 1'b1;
 
     genvar i;

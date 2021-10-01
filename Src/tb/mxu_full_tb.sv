@@ -5,11 +5,12 @@ module mxu_full_tb ();
 
     class rand_matrix #(
         parameter N = 8,
-        parameter M = 8
+        parameter M = 8,
+        parameter WIDTH = 8
     );
-        rand bit [N - 1:0][M - 1:0] matrix;
+        rand bit [N - 1:0][M - 1:0][WIDTH - 1:0] matrix;
 
-        function logic [N - 1:0][M - 1:0] gen_matrix();
+        function logic [N - 1:0][M - 1:0][WIDTH - 1:0] gen_matrix();
             gen_matrix = matrix;
         endfunction
     endclass
@@ -19,7 +20,7 @@ module mxu_full_tb ();
 
     logic [`A_N - 1:0][`A_M - 1:0][`BITWIDTH - 1:0] A;
     logic [`B_N - 1:0][`B_M - 1:0][`BITWIDTH - 1:0] B;
-    logic [`A_N - 1:0][`B_M - 1:0][`BITWIDTH - 1:0] Y;
+    logic [`A_N - 1:0][`B_M - 1:0][2*`BITWIDTH - 1:0] Y;
 
     logic a_valid;
     logic b_valid;
@@ -28,17 +29,17 @@ module mxu_full_tb ();
     int     i;
     longint timeout;
 
-    rand_matrix #(.N(`A_N), .M(`A_M)) A_rand;
-    rand_matrix #(.N(`B_N), .M(`B_M)) B_rand;
+    rand_matrix #(.N(`A_N), .M(`A_M), .WIDTH(`BITWIDTH)) A_rand;
+    rand_matrix #(.N(`B_N), .M(`B_M), .WIDTH(`BITWIDTH)) B_rand;
 
-    /*
-     * TODO: add parameter/port names
-     */
-    /*
-    mxu dut (
-        .*
+    multiplier #(.DIM(`A_N), .WIDTH(`BITWIDTH)) dut(
+        .clk(clk),
+        .reset_n(reset_n),
+        .in0(B),
+        .in1(A),
+        .out(Y),
+        .finished(y_valid)
     );
-    */
 
     initial begin
         clk = 0;
@@ -52,7 +53,7 @@ module mxu_full_tb ();
         reset_n <= 1'b1;
     endtask
 
-    function logic [`A_N - 1:0][`B_M - 1:0][`BITWIDTH - 1:0] matrix_multiply();
+    function logic [`A_N - 1:0][`B_M - 1:0][2*`BITWIDTH - 1:0] matrix_multiply();
         /* Initialize to 0 */
         for(int row = 0; row < `A_N; row++) begin
             for(int col = 0; col < `B_M; col++) begin
@@ -64,7 +65,12 @@ module mxu_full_tb ();
         for(int row = 0; row < `A_N; row++) begin
             for(int col = 0; col < `B_M; col++) begin
                 for(int x = 0; x < `A_M; x++) begin
-                    matrix_multiply[row][col] += A[row][x] * B[x][col];
+                    if (A[row][x][`BITWIDTH - 1] ^ B[x][col][`BITWIDTH - 1]) begin
+                        matrix_multiply[row][col] -= A[row][x] * B[x][col];
+                    end
+                    else begin
+                        matrix_multiply[row][col] += A[row][x] * B[x][col];
+                    end
                 end
             end
         end
@@ -93,11 +99,17 @@ module mxu_full_tb ();
         reset();
 
         for(i = 0; i < `TEST_CASES; i++) begin
+            A_rand = new();
+            B_rand = new();
+
             if(!A_rand.randomize()) $error("random gen error");
             if(!B_rand.randomize()) $error("random gen error");
 
-            A                  <= A_rand.gen_matrix();
-            B                  <= B_rand.gen_matrix();
+            // A                  <= A_rand.gen_matrix();
+            // B                  <= B_rand.gen_matrix();
+            A = A_rand.matrix;
+            B = B_rand.matrix;
+
             {a_valid, b_valid} <= 2'b11;
 
             timeout = 0;
