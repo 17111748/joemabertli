@@ -226,8 +226,10 @@ module systolic_unary_matmul #(
     
     // Store inputs A and B in register 
     always_ff @(posedge clk, negedge reset_n) begin 
-        A_reg <= A; 
-        B_reg <= B; 
+        if (input_valid) begin
+            A_reg <= A; 
+            B_reg <= B; 
+        end
     end 
 
     // Combinational logic with clocking to determine A_comparator_in (systolic flow into the comparator)
