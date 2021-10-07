@@ -40,7 +40,8 @@ def mmm(A, B, bitwidth):
     for r in range(A_n):
         for c in range(B_m):
             for z in range(A_m):
-                M[r][c] = (M[r][c] + A[r][z] * B[z][c]) % (-1 * 2 ** bitwidth)
+                M[r][c] = M[r][c] + A[r][z] * B[z][c]
+            M[r][c] = tc(bin(M[r][c] & int("1" * bitwidth, 2)), bitwidth)
 
     return M
 
