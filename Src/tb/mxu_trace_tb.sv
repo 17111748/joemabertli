@@ -128,6 +128,9 @@ module mxu_tb ();
     endfunction
 
     initial begin
+        $dumpfile("mxu.vcd");
+        $dumpvars(0, mxu_tb);
+
         reset();
         parse_trace();
 
