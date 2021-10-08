@@ -1,5 +1,3 @@
-set DUT unary_shift_mac
-set DUT_TB unary_shift_mac_tb
 #### Template Script for RTL->Gate-Level Flow (generated from GENUS 18.14-s037_1) 
 
 if {[file exists /proc/cpuinfo]} {
@@ -18,7 +16,7 @@ puts "Hostname : [info hostname]"
 #set THRES 13
 
 # top-level module name
-set DESIGN $DUT
+set DESIGN systolic_unary_matmul
 set GEN_EFF high
 set MAP_OPT_EFF high
 set DATE [clock format [clock seconds] -format "%b%d-%T"] 
@@ -27,20 +25,22 @@ set _REPORTS_PATH ./report/
 set _LOG_PATH ./log/
 
 # specify vcd file path (can also replace vcd with tcf)
-set vcd_file ../Src/tb/unary_shift_tb.vcd
+set vcd_file ../Src/systolic_unary.vcd
 
 # Change! paths to asap7 lib and lef folder
 set_db / .init_lib_search_path {../asap7_dir/}
 # Change! path to tcl script
 set_db / .script_search_path {./}
 # Change! rtl path
-set_db / .init_hdl_search_path {../Src/rtl} 
+set_db / .init_hdl_search_path {../Src/systolic_arch/} 
 
 set_db / .information_level 7 
 
 set_db auto_ungroup none
 
 set_db libscore_enable true 
+
+set_db hdl_max_loop_limit 1048576
 
 ###############################################################
 ## Library setup
@@ -59,9 +59,7 @@ read_physical -lef " \
 "
 
 # Change! path to qrcTech
-# read_qrc /afs/ece.cmu.edu/usr/pvellais/Private/ASAP7/ASAP7_PDKandLIB_v1p6/lib_release_191006/asap7_7p5t_library/rev25/qrc/qrcTechFile_typ03_scaled4xV06
-# TODO
-read_qrc ./qrcTechFile_typ03_scaled4xV06 
+read_qrc ../asap7_dir/qrcTechFile_typ03_scaled4xV06
 set_db / .hdl_generate_index_style %s_%d_
 set_db / .lp_insert_clock_gating false
 set_db / .hdl_track_filename_row_col true 
@@ -71,7 +69,7 @@ set_db / .hdl_track_filename_row_col true
 ## Load Design
 ####################################################################
 # Change! specify rtl files to synthesize
-read_hdl -language sv "pipo_shift.sv sipo_shift.sv unary_adder.sv unary_shift_multiplier.sv serial_stack.sv siso_shift.sv unary_shift_mac.sv"
+read_hdl -language sv "systolic_unary_matmul_2b.sv"
 elaborate $DESIGN
 puts "Runtime & Memory after 'read_hdl'"
 time_info Elaboration
@@ -129,7 +127,7 @@ foreach cg [vfind / -cost_group *] {
 ####################################################################
 
 # Change! DUT name
-read_vcd $vcd_file -vcd_scope $DUT_TB/dut
+read_vcd $vcd_file -vcd_scope systolic_unary_matmul_tb/dut
 
 ####################################################################
 ## Power Constraints Setup
@@ -203,7 +201,7 @@ write_sdc > ${_OUTPUTS_PATH}/${DESIGN}_m.sdc
 write_sdf -timescale ns -precision 3 > ${_OUTPUTS_PATH}/${DESIGN}_m.sdf
 
 # Change! DUT name
-read_vcd $vcd_file -vcd_scope $DUT_TB/DUT
+read_vcd $vcd_file -vcd_scope systolic_unary_matmul_tb/dut
 report_power > $_REPORTS_PATH/${DESIGN}_power.rpt
 
 #################################
