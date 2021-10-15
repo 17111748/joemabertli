@@ -2,13 +2,16 @@
 -ieee1364
 -v93
 -nospecify
--timescale 1ns/1ps
+-timescale 100ns/1ps
 -mess
 -access +rwc
 -sv
 
 # provide path to rtl file
 
-../Src/tb/unary_shift_mac_tb.sv
-../Src/rtl/*.sv
 
+# ../Src/library.sv 
+#../Src/unary_binary_MAC.sv
+#../Src/unary_binary_tb.sv
+../Src/systolic_arch/systolic_unary_matmul_2b.sv
+../Src/systolic_arch/systolic_unary_matmul_tb.sv 
