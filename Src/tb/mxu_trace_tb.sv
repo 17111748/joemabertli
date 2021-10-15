@@ -2,11 +2,11 @@
 `include "tb_define.vh"
 
 module mxu_tb ();
-    typedef logic [`A_N - 1:0][`A_M - 1:0][`BITWIDTH - 1:0] matrix_a_t;
-    typedef logic [`B_N - 1:0][`B_M - 1:0][`BITWIDTH - 1:0] matrix_b_t;
-    typedef logic [`A_N - 1:0][`B_M - 1:0][`BITWIDTH - 1:0] matrix_y_t;
+    typedef logic [`DIM - 1:0][`DIM - 1:0][`BITWIDTH - 1:0] matrix_a_t;
+    typedef logic [`DIM - 1:0][`DIM - 1:0][`BITWIDTH - 1:0] matrix_b_t;
+    typedef logic [`DIM - 1:0][`DIM - 1:0][`OUT_BITWIDTH - 1:0] matrix_y_t;
 
-    typedef logic [`BITWIDTH - 1:0] matrix_mem_t [`MAX_TRACES * (`A_N*`A_M + `B_N*`B_M) - 1:0];
+    typedef logic [`BITWIDTH - 1:0] matrix_mem_t [`MAX_TRACES * (`DIM*`DIM + `DIM*`DIM) - 1:0];
 
     matrix_a_t matrix_a_queue [$];
     matrix_b_t matrix_b_queue [$];
@@ -28,7 +28,7 @@ module mxu_tb ();
     logic y_valid;
 
     multiplier #(
-        .DIM    (`A_N),
+        .DIM    (`DIM),
         .WIDTH  (`BITWIDTH)
     ) dut (
         .clk       (clk),
@@ -88,16 +88,16 @@ module mxu_tb ();
 
         for(int n = 0; n < num_traces; n++) begin
             count = 0;
-            for(int r = 0; r < `A_N; r++) begin
-                for(int c = 0; c < `A_M; c++) begin
-                    A[r][c] = matrix_mem[n * (`A_N*`A_M + `B_N*`B_M) + count];
+            for(int r = 0; r < `DIM; r++) begin
+                for(int c = 0; c < `DIM; c++) begin
+                    A[r][c] = matrix_mem[n * (`DIM*`DIM + `DIM*`DIM) + count];
                     count++;
                 end
             end
 
-            for(int r = 0; r < `B_N; r++) begin
-                for(int c = 0; c < `B_M; c++) begin
-                    B[r][c] = matrix_mem[n * (`A_N*`A_M + `B_N*`B_M) + count];
+            for(int r = 0; r < `DIM; r++) begin
+                for(int c = 0; c < `DIM; c++) begin
+                    B[r][c] = matrix_mem[n * (`DIM*`DIM + `DIM*`DIM) + count];
                     count++;
                 end
             end
@@ -116,8 +116,8 @@ module mxu_tb ();
         while(matrix_y_queue.size() > 0) begin
             Y_write = matrix_y_queue.pop_front();
 
-            for(int r = 0; r < `A_N; r++) begin
-                for(int c = 0; c < `B_M; c++) begin
+            for(int r = 0; r < `DIM; r++) begin
+                for(int c = 0; c < `DIM; c++) begin
                     $fdisplay(fd, "%b", Y_write[r][c]);
                 end
             end
@@ -150,7 +150,7 @@ module mxu_tb ();
                 `ifdef `TIME_MAX
                 if(timeout >= `TIME_MAX) begin
                     $display("Timeout at time %0d. Aborting...", $time);
-                    $fatal();
+                    $finish();
                 end
                 `endif // TIME_MAX
 

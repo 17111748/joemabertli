@@ -9,6 +9,10 @@ Use this script to compile and run a simulation.
 
 Use the -h flag for a list of options
 
+Ex.
+
+    > python3 run_trace.py --num-traces=2 --trace-file=traces/2x2_4bits_2tests.trace --N=2 --in-bitwidth=4 --out-bitwidth=8
+
 """
 import os
 import sys
@@ -17,7 +21,8 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--num-traces', type=int)
-    parser.add_argument('--bitwidth', type=int)
+    parser.add_argument('--in-bitwidth', type=int)
+    parser.add_argument('--out-bitwidth', type=int)
     parser.add_argument('--trace-file', type=str, default='trace.trace')
     parser.add_argument('--compile', action="store_true")
     parser.add_argument('--N', help="The x and y dimension of the matrices", type=int)
@@ -96,15 +101,15 @@ if __name__ == "__main__":
             Y.append([])
             A.append([])
             for c in range(args.N):
-                Y[r].append(tc(out_lines[out_count], args.bitwidth))
-                A[r].append(tc(in_lines[in_count], args.bitwidth))
+                Y[r].append(tc(out_lines[out_count], args.out_bitwidth))
+                A[r].append(tc(in_lines[in_count], args.in_bitwidth))
                 in_count += 1
                 out_count += 1
 
         for r in range(args.N):
             B.append([])
             for c in range(args.N):
-                B[r].append(tc(in_lines[in_count], args.bitwidth))
+                B[r].append(tc(in_lines[in_count], args.in_bitwidth))
                 in_count += 1
 
         print("==================================")
@@ -119,7 +124,7 @@ if __name__ == "__main__":
         print("Output:")
         print_matrix(Y)
 
-        M = mmm(A, B, args.bitwidth)
+        M = mmm(A, B, args.out_bitwidth)
 
         if(not matrix_eq(M, Y)):
             print("Test failed. Correct output matrix:")
