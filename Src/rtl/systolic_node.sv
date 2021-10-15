@@ -21,6 +21,7 @@ module systolic_node #(
 
     generate
 
+    /* Right now, only works with UWIDTH == 2 */
     if(UWIDTH == 2) begin
         always_comb begin
             o[2] = north[0] & north[1] & west[0] & west[1];
@@ -56,7 +57,6 @@ module systolic_node #(
                 .c_out  (c[i + 4])
             );
         end
-       //assign mac_d = mac_q + o;
     end
 
     else begin
