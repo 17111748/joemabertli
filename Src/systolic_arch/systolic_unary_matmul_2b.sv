@@ -157,10 +157,12 @@ module systolic_node #(
 endmodule : systolic_node
 
 
-module systolic_unary_matmul #(
-    parameter BIT_WIDTH = 4, 
+module temporal_mxu #(
+    parameter DIM = 2, 
+    parameter BIT_WIDTH = 4,
+    parameter OUT_BIT_WIDTH = 2 * BIT_WIDTH,  
     parameter SIZE = BIT_WIDTH-1, 
-    parameter A_ROW = 2,
+    parameter A_ROW = DIM,
     parameter A_ROW_SIZE = $clog2(A_ROW) + 1, // bit width of A_ROW; TODO: clog2 gives the ceiling of log2(x), but in the case of x = power of 2, we need one more bit
     parameter A_COL = A_ROW,
     parameter B_ROW = A_COL,  
@@ -168,11 +170,11 @@ module systolic_unary_matmul #(
 )(
     input  logic clk, 
     input  logic reset_n, 
-    input  logic input_valid, 
+    input  logic start, 
     input  logic [A_ROW-1:0][A_COL-1:0][BIT_WIDTH-1:0] A, 
     input  logic [B_ROW-1:0][B_COL-1:0][BIT_WIDTH-1:0] B, 
-    output logic output_ready, 
-    output logic [A_ROW-1:0][B_COL-1:0][(BIT_WIDTH<<1)-1:0] C
+    output logic out_valid, 
+    output logic [A_ROW-1:0][B_COL-1:0][(BIT_WIDTH<<1)-1:0] out
 ); 
     localparam COUNTER_N = (1<<SIZE) + 1;
     localparam DATA_CLK_CYCLES = COUNTER_N + 1; 
@@ -180,8 +182,8 @@ module systolic_unary_matmul #(
     logic [A_ROW-1:0][A_COL-1:0][BIT_WIDTH-1:0] A_reg; 
     logic [B_ROW-1:0][B_COL-1:0][BIT_WIDTH-1:0] B_reg; 
     
-    logic [SIZE:0] counter_out; 
-    logic [A_COL-1:0][SIZE-1:0] A_comparator_in; // Magnitude of the inputs coming in 
+    logic [BIT_WIDTH-1:0] counter_out; 
+    logic [A_COL-1:0][BIT_WIDTH-1:0] A_comparator_in; // Magnitude of the inputs coming in 
     logic [A_COL-1:0] A_is_negative; // Signed bit of the inputs coming in 
     logic [B_ROW-1:0] unary_A_comparator_out; 
 
@@ -193,17 +195,17 @@ module systolic_unary_matmul #(
 
     logic [A_ROW_SIZE+1:0] data_clk_count; 
     
-    assign output_ready = (data_clk_count == (A_ROW + A_COL + B_ROW)); 
+    assign out_valid = (data_clk_count == (A_ROW + A_COL + B_ROW)); 
 
 
-    Counter_to_N #(.WIDTH(SIZE+1)) counter_A(.en(1'b1), .clear(~reset_n), .clk(clk), .N(COUNTER_N), .Q(counter_out)); 
+    Counter_to_N #(.WIDTH(BIT_WIDTH)) counter_A(.en(1'b1), .clear(~reset_n), .clk(clk), .N(COUNTER_N), .Q(counter_out)); 
 
     Counter #(.WIDTH(A_ROW_SIZE+2)) counter_data_clk(.en(data_clk), .clear(~reset_n), .clk(clk), .Q(data_clk_count));
 
     genvar i; 
     generate 
         for (i = 0; i < A_COL; i=i+1) begin 
-            Comparator #(.WIDTH(SIZE+1)) comparator_A(.counter(counter_out), .A({1'b0, A_comparator_in[i]}), .out(unary_A_comparator_out[i]));  
+            Comparator #(.WIDTH(BIT_WIDTH)) comparator_A(.counter(counter_out), .A(A_comparator_in[i]), .out(unary_A_comparator_out[i]));  
         end 
     endgenerate
     
@@ -242,7 +244,7 @@ module systolic_unary_matmul #(
     always_ff@(posedge data_clk, negedge reset_n) begin 
         if (~reset_n) begin 
             for (int j = 0; j < A_COL; j=j+1) begin
-                A_comparator_in[j] <= (SIZE)'('d0);
+                A_comparator_in[j] <= 0;
                 A_is_negative[j] <= 1'b0; 
             end 
         end 
@@ -250,16 +252,16 @@ module systolic_unary_matmul #(
             for (int j = 0; j < A_COL; j=j+1) begin 
                 if ((data_clk_count >= j) && ((data_clk_count - j) < A_ROW)) begin
                     if (A[(data_clk_count - j)][j][BIT_WIDTH-1]) begin 
-                        A_comparator_in[j] <= ~(A[(data_clk_count - j)][j][BIT_WIDTH-2:0]) + 1; 
+                        A_comparator_in[j] <= ~(A[(data_clk_count - j)][j][BIT_WIDTH-1:0]) + 1; 
                         A_is_negative[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-1]; 
                     end 
                     else begin 
-                        A_comparator_in[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-2:0]; 
+                        A_comparator_in[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-1:0]; 
                         A_is_negative[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-1]; 
                     end 
                 end 
                 else begin
-                    A_comparator_in[j] <= (SIZE)'('d0);
+                    A_comparator_in[j] <= 0;
                     A_is_negative[j] <= 1'b0; 
                 end 
             end
@@ -267,16 +269,16 @@ module systolic_unary_matmul #(
     end 
 
     // Combinational logic with clocking to assign the last output of intermediate_data to the C
-    // Scheduling the C as outputs
+    // Scheduling the out as outputs
     always_ff@(posedge data_clk, negedge reset_n) begin 
         if (~reset_n) begin 
-            C <= 0; // [A_ROW-1:0][B_COL-1:0][(BIT_WIDTH<<1)-1:0] C
+            out <= 0; // [A_ROW-1:0][B_COL-1:0][(BIT_WIDTH<<1)-1:0] C
         end 
         else begin 
             for (int m = 0; m < A_ROW; m+=1) begin
                 for (int n = 0; n < B_COL; n+=1) begin
                     if (data_clk_count == (m + n + A_COL + 1)) begin
-                        C[m][n] <= intermediate_data_cur[B_ROW][n]; 
+                        out[m][n] <= intermediate_data_cur[B_ROW][n]; 
                     end
                 end
             end
