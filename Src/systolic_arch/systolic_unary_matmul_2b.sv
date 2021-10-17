@@ -1,5 +1,5 @@
 // `default_nettype none 
-`timescale 100ns/1ps
+`timescale 1ns/1ps
 
 
 module Counter 
@@ -97,12 +97,12 @@ endmodule
 
 // Systolic_node that has the AND gates and adder tree 
 module systolic_node #(
-    parameter BIT_WIDTH = 5, 
+    parameter BIT_WIDTH = 4, 
     parameter SIZE = BIT_WIDTH-1, 
-    parameter A_ROW = 2,
-    parameter A_COL = 2,
+    parameter A_ROW = 8,
+    parameter A_COL = 8,
     parameter B_ROW = A_COL,  
-    parameter B_COL = 2 
+    parameter B_COL = 8 
 ) (
     input  logic clk, 
     input  logic reset_n, 
@@ -158,13 +158,13 @@ endmodule : systolic_node
 
 
 module systolic_unary_matmul #(
-    parameter BIT_WIDTH = 5, 
+    parameter BIT_WIDTH = 4, 
     parameter SIZE = BIT_WIDTH-1, 
     parameter A_ROW = 2,
     parameter A_ROW_SIZE = $clog2(A_ROW) + 1, // bit width of A_ROW; TODO: clog2 gives the ceiling of log2(x), but in the case of x = power of 2, we need one more bit
-    parameter A_COL = 2,
+    parameter A_COL = A_ROW,
     parameter B_ROW = A_COL,  
-    parameter B_COL = 2 
+    parameter B_COL = A_ROW 
 )(
     input  logic clk, 
     input  logic reset_n, 
@@ -229,8 +229,10 @@ module systolic_unary_matmul #(
     
     // // Store inputs A and B in register 
     // always_ff @(posedge clk, negedge reset_n) begin 
-    //     A_reg <= A; 
-    //     B_reg <= B; 
+    //     if (~reset_n) begin 
+    //         A_reg <= A; 
+    //         B_reg <= B;
+    //     end  
     // end 
 
     
@@ -238,41 +240,47 @@ module systolic_unary_matmul #(
     // Combinational logic with clocking to determine A_comparator_in (systolic flow into the comparator)
     // Scheduling the A as inputs 
     always_ff@(posedge data_clk, negedge reset_n) begin 
-        for (int j = 0; j < A_COL; j+=1) begin
-            if (~reset_n) begin 
+        if (~reset_n) begin 
+            for (int j = 0; j < A_COL; j=j+1) begin
                 A_comparator_in[j] <= (SIZE)'('d0);
                 A_is_negative[j] <= 1'b0; 
             end 
-            else if ((data_clk_count >= j) && ((data_clk_count - j) < A_ROW)) begin
-                if (A[(data_clk_count - j)][j][BIT_WIDTH-1]) begin 
-                    A_comparator_in[j] <= ~(A[(data_clk_count - j)][j][BIT_WIDTH-2:0]) + 1; 
-                    A_is_negative[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-1]; 
+        end 
+        else begin  
+            for (int j = 0; j < A_COL; j=j+1) begin 
+                if ((data_clk_count >= j) && ((data_clk_count - j) < A_ROW)) begin
+                    if (A[(data_clk_count - j)][j][BIT_WIDTH-1]) begin 
+                        A_comparator_in[j] <= ~(A[(data_clk_count - j)][j][BIT_WIDTH-2:0]) + 1; 
+                        A_is_negative[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-1]; 
+                    end 
+                    else begin 
+                        A_comparator_in[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-2:0]; 
+                        A_is_negative[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-1]; 
+                    end 
                 end 
-                else begin 
-                    A_comparator_in[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-2:0]; 
-                    A_is_negative[j] <= A[(data_clk_count - j)][j][BIT_WIDTH-1]; 
+                else begin
+                    A_comparator_in[j] <= (SIZE)'('d0);
+                    A_is_negative[j] <= 1'b0; 
                 end 
             end
-            else begin
-                A_comparator_in[j] <= (SIZE)'('d0);
-                A_is_negative[j] <= 1'b0; 
-            end
-        end
+        end 
     end 
 
     // Combinational logic with clocking to assign the last output of intermediate_data to the C
     // Scheduling the C as outputs
     always_ff@(posedge data_clk, negedge reset_n) begin 
-        for (int m = 0; m < A_ROW; m+=1) begin
-            for (int n = 0; n < B_COL; n+=1) begin
-                if (~reset_n) begin 
-                    C[m][n] <= ((BIT_WIDTH<<1))'('d0);
-                end 
-                if (data_clk_count == (m + n + A_COL + 1)) begin
-                    C[m][n] <= intermediate_data_cur[B_ROW][n]; 
+        if (~reset_n) begin 
+            C <= 0; // [A_ROW-1:0][B_COL-1:0][(BIT_WIDTH<<1)-1:0] C
+        end 
+        else begin 
+            for (int m = 0; m < A_ROW; m+=1) begin
+                for (int n = 0; n < B_COL; n+=1) begin
+                    if (data_clk_count == (m + n + A_COL + 1)) begin
+                        C[m][n] <= intermediate_data_cur[B_ROW][n]; 
+                    end
                 end
             end
-        end
+        end 
     end
     
 
@@ -280,24 +288,28 @@ module systolic_unary_matmul #(
     // Pipeline for unary signal A (left to right)
     assign unary_A[0] = unary_A_comparator_out; 
     always_ff @(posedge clk, negedge reset_n) begin
-        for (int l = 1; l < (B_COL * DATA_CLK_CYCLES); l=l+1) begin 
-            if (~reset_n) begin 
-                unary_A[l] <= {B_ROW{1'b0}}; 
+        if (~reset_n) begin 
+            for (int l = 1; l < (B_COL * DATA_CLK_CYCLES); l=l+1) begin 
+                unary_A[l] <= 0; 
             end
-            else begin 
+        end 
+        else begin 
+            for (int l = 1; l < (B_COL * DATA_CLK_CYCLES); l=l+1) begin 
                 unary_A[l] <= unary_A[l-1]; 
-            end  
-        end   
+            end
+        end 
     end 
 
     
     assign A_signed_bit[0] = A_is_negative; 
     always_ff @(posedge data_clk, negedge reset_n) begin 
-        for (int i = 1; i < B_COL; i+=1) begin 
-            if (~reset_n) begin 
-                A_signed_bit[i] <= {B_ROW{1'b0}}; 
+        if (~reset_n) begin 
+            for (int i = 1; i < B_COL; i+=1) begin 
+                A_signed_bit[i] <= 0; 
             end 
-            else begin 
+        end 
+        else begin 
+            for (int i = 1; i < B_COL; i+=1) begin 
                 A_signed_bit[i] <= A_signed_bit[i-1]; 
             end 
         end 
@@ -310,6 +322,7 @@ module systolic_unary_matmul #(
             intermediate_data_cur <= 0; 
         end 
         else begin 
+            intermediate_data_cur[0] <= 0; 
             for (int m = 1; m < B_ROW+1; m=m+1) begin
                 intermediate_data_cur[m] <= intermediate_data_next[m-1];  
             end 
