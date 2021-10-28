@@ -2,7 +2,7 @@
 
 
 module unary_binary_mxu_tb(); 
-    localparam BIT_WIDTH = 4; 
+    localparam BIT_WIDTH = 4;
     localparam DIM = 2; 
     localparam A_ROW = DIM;
     localparam A_COL = DIM;
