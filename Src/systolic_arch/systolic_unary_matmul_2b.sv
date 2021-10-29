@@ -1,165 +1,9 @@
 // `default_nettype none 
-`timescale 1ns/1ps
-
-
-module Counter 
-  #(parameter WIDTH = 4) 
-  (input  logic en, 
-   input  logic clear, 
-   input  logic clk, 
-   output logic [WIDTH-1:0] Q);
-
-   always_ff @(posedge clk) 
-    if(clear)
-      Q <= 0; 
-    else if (en)
-      Q <= Q + 1; 
-
-endmodule : Counter 
-
-module Counter_to_N 
-  #(parameter WIDTH = 4) 
-  (input  logic en, 
-   input  logic clear, 
-   input  logic clk, 
-   input  logic [31:0] N, 
-   output logic [WIDTH-1:0] Q);
-
-   always_ff @(posedge clk) begin 
-    if(clear)
-      Q <= 0; 
-    else if (en) begin 
-      if(Q == N) 
-        Q <= 0; 
-      else 
-        Q <= Q + 1; 
-    end
-   end 
-
-endmodule : Counter_to_N 
-
-module Comparator #(
-    parameter WIDTH = 4
-) (
-    input  logic [WIDTH-1:0] counter, 
-    input  logic [WIDTH-1:0] A, 
-    output logic out
-); 
-
-    assign out = (counter < A); 
-
-endmodule : Comparator 
-
-module adder_tree 
-    #(parameter NUM_ELEMENTS = 16,  //Should be same number as number of voters
-      parameter INDEX_W = $clog2(NUM_ELEMENTS + 1)) 
-    (input  logic [NUM_ELEMENTS-1:0] in,
-     output logic [INDEX_W-1:0] sum);
-
-    generate
-        if(NUM_ELEMENTS == 1) begin
-            assign sum = in[0];
-        end else if(NUM_ELEMENTS == 2) begin
-            assign sum = in[0] + in [1];
-        end else if(NUM_ELEMENTS == 3) begin
-            assign sum = in[0] + in [1] + in[2];
-        end else begin
-            localparam LEFT_SIZE = (NUM_ELEMENTS-1)/2; // subtract one for carry in
-            localparam LEFT_END_INDEX = LEFT_SIZE;
-            localparam LEFT_W = $clog2(LEFT_SIZE+1);
-
-            localparam RIGHT_SIZE = (NUM_ELEMENTS-1) - LEFT_SIZE;
-            localparam RIGHT_INDEX = LEFT_SIZE + 1;
-            localparam RIGHT_END_INDEX = NUM_ELEMENTS - 1;
-            localparam RIGHT_W = $clog2(RIGHT_SIZE+1);
-
-            logic [LEFT_W-1:0] left_temp;
-            logic [RIGHT_W-1:0] right_temp;
-
-            logic carry_in;
-            assign carry_in = in[0];
-            adder_tree #(LEFT_SIZE) lefty (
-                .in(in[LEFT_END_INDEX:1]),
-                .sum(left_temp)
-            );
-
-            adder_tree #(RIGHT_SIZE) righty (
-                .in(in[RIGHT_END_INDEX:RIGHT_INDEX]),
-                .sum(right_temp)
-            );
-
-            always_comb begin
-                sum = left_temp + right_temp + carry_in;
-            end
-        end
-    endgenerate
-endmodule
-
-// Systolic_node that has the AND gates and adder tree 
-module systolic_node #(
-    parameter BIT_WIDTH = 4, 
-    parameter SIZE = BIT_WIDTH-1, 
-    parameter A_ROW = 8,
-    parameter A_COL = 8,
-    parameter B_ROW = A_COL,  
-    parameter B_COL = 8 
-) (
-    input  logic clk, 
-    input  logic reset_n, 
-    input  logic data_clk, 
-    input  logic unary_A, 
-    input  logic AisNegative, 
-    input  logic [BIT_WIDTH-1:0] binary_B, // TODO: ensure this is always_asserted
-    input  logic [(BIT_WIDTH<<1)-1:0] intermediate_data, 
-    output logic [(BIT_WIDTH<<1)-1:0] out 
-); 
-
-    logic [(1<<SIZE)-1:0] unary_out; 
-    assign unary_out[(1<<SIZE)-1] = 1'b0;
-
-    logic [SIZE-1:0] translated_B; // Convert to Signed Magnitude 
-    assign translated_B = (binary_B[BIT_WIDTH-1]) ? (~(binary_B[BIT_WIDTH-2:0]) + 1) : binary_B[BIT_WIDTH-2:0]; 
-
-    // Mask the Fanned Out unary inputs with the bits of a binary number 
-    genvar i; 
-    generate 
-        for(i = 1; i < (1<<SIZE); i=i+1) begin 
-            assign unary_out[i-1] = unary_A & translated_B[$clog2(i+1)-1]; // Masking it with the second input
-        end
-    endgenerate  
-
-    logic [$clog2((1<<SIZE)+1)-1:0] adder_tree_out; 
-    adder_tree #(.NUM_ELEMENTS((1<<SIZE))) at (.in(unary_out), .sum(adder_tree_out));
-
-    always_ff@(posedge clk, negedge reset_n) begin 
-        if(~reset_n) begin  
-            out <= 1'b0; 
-        end 
-        else if (data_clk) begin 
-            if (binary_B[BIT_WIDTH-1] != AisNegative) begin 
-                out <= intermediate_data - adder_tree_out; 
-            end 
-            else begin 
-                out <= intermediate_data + adder_tree_out; 
-            end 
-        end 
-        else begin 
-            if (binary_B[BIT_WIDTH-1] != AisNegative) begin 
-                out <= out - adder_tree_out; 
-            end 
-            else begin 
-                out <= out + adder_tree_out; 
-            end 
-        end  
-    end 
-
-      
-endmodule : systolic_node
-
+// `timescale 1ns/1ps
 
 module temporal_mxu #(
-    parameter DIM = 2, 
-    parameter BIT_WIDTH = 4,
+    parameter DIM = 16, 
+    parameter BIT_WIDTH = 8,
     parameter OUT_BIT_WIDTH = 2 * BIT_WIDTH,  
     parameter SIZE = BIT_WIDTH-1, 
     parameter A_ROW = DIM,
@@ -330,7 +174,160 @@ module temporal_mxu #(
             end 
         end 
     end 
-
-
-
 endmodule 
+
+
+// Systolic_node that has the AND gates and adder tree 
+module systolic_node #(
+    parameter BIT_WIDTH = 4, 
+    parameter SIZE = BIT_WIDTH-1, 
+    parameter A_ROW = 8,
+    parameter A_COL = 8,
+    parameter B_ROW = A_COL,  
+    parameter B_COL = 8 
+) (
+    input  logic clk, 
+    input  logic reset_n, 
+    input  logic data_clk, 
+    input  logic unary_A, 
+    input  logic AisNegative, 
+    input  logic [BIT_WIDTH-1:0] binary_B, // TODO: ensure this is always_asserted
+    input  logic [(BIT_WIDTH<<1)-1:0] intermediate_data, 
+    output logic [(BIT_WIDTH<<1)-1:0] out 
+); 
+
+    logic [(1<<SIZE)-1:0] unary_out; 
+    assign unary_out[(1<<SIZE)-1] = 1'b0;
+
+    logic [SIZE-1:0] translated_B; // Convert to Signed Magnitude 
+    assign translated_B = (binary_B[BIT_WIDTH-1]) ? (~(binary_B[BIT_WIDTH-2:0]) + 1) : binary_B[BIT_WIDTH-2:0]; 
+
+    // Mask the Fanned Out unary inputs with the bits of a binary number 
+    genvar i; 
+    generate 
+        for(i = 1; i < (1<<SIZE); i=i+1) begin 
+            assign unary_out[i-1] = unary_A & translated_B[$clog2(i+1)-1]; // Masking it with the second input
+        end
+    endgenerate  
+
+    logic [$clog2((1<<SIZE)+1)-1:0] adder_tree_out; 
+    adder_tree #(.NUM_ELEMENTS((1<<SIZE))) at (.in(unary_out), .sum(adder_tree_out));
+
+    always_ff@(posedge clk, negedge reset_n) begin 
+        if(~reset_n) begin  
+            out <= 1'b0; 
+        end 
+        else if (data_clk) begin 
+            if (binary_B[BIT_WIDTH-1] != AisNegative) begin 
+                out <= intermediate_data - adder_tree_out; 
+            end 
+            else begin 
+                out <= intermediate_data + adder_tree_out; 
+            end 
+        end 
+        else begin 
+            if (binary_B[BIT_WIDTH-1] != AisNegative) begin 
+                out <= out - adder_tree_out; 
+            end 
+            else begin 
+                out <= out + adder_tree_out; 
+            end 
+        end  
+    end 
+
+      
+endmodule : systolic_node
+
+
+module Counter 
+  #(parameter WIDTH = 4) 
+  (input  logic en, 
+   input  logic clear, 
+   input  logic clk, 
+   output logic [WIDTH-1:0] Q);
+
+   always_ff @(posedge clk) 
+    if(clear)
+      Q <= 0; 
+    else if (en)
+      Q <= Q + 1; 
+
+endmodule : Counter 
+
+module Counter_to_N 
+  #(parameter WIDTH = 4) 
+  (input  logic en, 
+   input  logic clear, 
+   input  logic clk, 
+   input  logic [31:0] N, 
+   output logic [WIDTH-1:0] Q);
+
+   always_ff @(posedge clk) begin 
+    if(clear)
+      Q <= 0; 
+    else if (en) begin 
+      if(Q == N) 
+        Q <= 0; 
+      else 
+        Q <= Q + 1; 
+    end
+   end 
+
+endmodule : Counter_to_N 
+
+module Comparator #(
+    parameter WIDTH = 4
+) (
+    input  logic [WIDTH-1:0] counter, 
+    input  logic [WIDTH-1:0] A, 
+    output logic out
+); 
+
+    assign out = (counter < A); 
+
+endmodule : Comparator 
+
+module adder_tree 
+    #(parameter NUM_ELEMENTS = 16,  //Should be same number as number of voters
+      parameter INDEX_W = $clog2(NUM_ELEMENTS + 1)) 
+    (input  logic [NUM_ELEMENTS-1:0] in,
+     output logic [INDEX_W-1:0] sum);
+
+    generate
+        if(NUM_ELEMENTS == 1) begin
+            assign sum = in[0];
+        end else if(NUM_ELEMENTS == 2) begin
+            assign sum = in[0] + in [1];
+        end else if(NUM_ELEMENTS == 3) begin
+            assign sum = in[0] + in [1] + in[2];
+        end else begin
+            localparam LEFT_SIZE = (NUM_ELEMENTS-1)/2; // subtract one for carry in
+            localparam LEFT_END_INDEX = LEFT_SIZE;
+            localparam LEFT_W = $clog2(LEFT_SIZE+1);
+
+            localparam RIGHT_SIZE = (NUM_ELEMENTS-1) - LEFT_SIZE;
+            localparam RIGHT_INDEX = LEFT_SIZE + 1;
+            localparam RIGHT_END_INDEX = NUM_ELEMENTS - 1;
+            localparam RIGHT_W = $clog2(RIGHT_SIZE+1);
+
+            logic [LEFT_W-1:0] left_temp;
+            logic [RIGHT_W-1:0] right_temp;
+
+            logic carry_in;
+            assign carry_in = in[0];
+            adder_tree #(LEFT_SIZE) lefty (
+                .in(in[LEFT_END_INDEX:1]),
+                .sum(left_temp)
+            );
+
+            adder_tree #(RIGHT_SIZE) righty (
+                .in(in[RIGHT_END_INDEX:RIGHT_INDEX]),
+                .sum(right_temp)
+            );
+
+            always_comb begin
+                sum = left_temp + right_temp + carry_in;
+            end
+        end
+    endgenerate
+endmodule
