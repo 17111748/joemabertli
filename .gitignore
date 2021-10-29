@@ -1,3 +1,14 @@
 asap7_dir
 ASAP7_PDKandLIB.tar
-Sim/unary_binary.vcd
+Sim/*
+!Sim/sim.args
+!Sim/tcf_dump.tcl
+!Sim/vcd_dump.tcl
+Synth/*
+!Synth/area.rpt
+!Synth/time.rpt
+!Synth/power.rpt
+!Synth/dc.tcl
+!Synth/run.tcl
+!Synth/NangateOpenCellLibrary_typical_ccs.db
+!Synth/NangateOpenCellLibrary_typical_ccs.sdb
