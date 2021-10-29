@@ -105,9 +105,9 @@ module row_mac
 endmodule: row_mac
 
 module temporal_mxu
-    #(parameter DIM = 4,
+    #(parameter DIM = 16,
       parameter DIM_BITS = $clog2(DIM),
-      parameter BIT_WIDTH = 4,
+      parameter BIT_WIDTH = 8,
       parameter OUT_BIT_WIDTH = 2 * BIT_WIDTH)
     (input  logic clk,
      input  logic reset_n,
