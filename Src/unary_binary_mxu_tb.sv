@@ -50,11 +50,8 @@ module unary_binary_mxu_tb();
         //                 dut.intermediate_data_cur[2][0], dut.intermediate_data_cur[2][1],
         //                 C[0][0], C[0][1], C[1][0], C[1][1]); 
 
-        $monitor($time,, {"\n\t\t     int_cur[1][0]: %b, int_cur[1][1]: %b \n\t\t     int_cur[2][0]: %b, int_cur[2][1]: %b\n", 
-                          "\n\t\t     C[0][0]:       %b, C[0][1]:       %b \n\t\t     C[1][0]:       %b, C[1][1]:       %b", 
+        $monitor($time,, {"\n\t\t     C[0][0]:       %b, C[0][1]:       %b \n\t\t     C[1][0]:       %b, C[1][1]:       %b", 
                           "\n\t\t     out_valid:  %b"},   
-                        dut.intermediate_data_cur[1][0], dut.intermediate_data_cur[1][1],
-                        dut.intermediate_data_cur[2][0], dut.intermediate_data_cur[2][1],
                         C[0][0], C[0][1], C[1][0], C[1][1], out_valid); 
 
         // $monitor($time,, {"\n\t\t     int_cur[1][0]: %d, int_cur[1][1]: %d", 
