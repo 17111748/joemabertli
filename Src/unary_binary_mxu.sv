@@ -36,7 +36,7 @@ module row_mac
 
     // Store resulting values in registers
     genvar i;
-    generate;
+    generate
         for (i = 0; i < DIM; i++) begin
             always_ff @(posedge clk) begin
                 if (value_rdy && (B_col == i))
@@ -47,7 +47,7 @@ module row_mac
         end
     endgenerate
 
-    enum logic [1:0] INIT, COMP, NEXT, DONE;
+    enum logic [1:0] {INIT, COMP, NEXT, DONE} curr_state, next_state;
 
     always_ff @(posedge clk, negedge reset_n) begin
         if (~reset_n) curr_state <= INIT;
