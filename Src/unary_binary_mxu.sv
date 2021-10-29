@@ -11,7 +11,7 @@ module row_mac
      input  logic [DIM-1:0][BIT_WIDTH-1:0] A_row,
      input  logic [DIM-1:0][DIM-1:0][BIT_WIDTH-1:0] B_trans,
      input  logic start,
-     output logic [DIM-1:0][OUTPUT_BIT_WIDTH-1:0] out_row,
+     output logic [DIM-1:0][OUT_BIT_WIDTH-1:0] out_row,
      output logic done);
 
     logic col_en, col_cl;
@@ -19,7 +19,8 @@ module row_mac
 
     logic next_col;
     logic value_rdy;
-    logic [OUTPUT_BIT_WIDTH-1:0] mac_out; // TODO: I think the MAC outputs a diff # bits tho
+    logic [OUT_BIT_WIDTH-1:0] mac_out; // TODO: I think the MAC outputs a diff # bits tho
+    logic last_col;
 
     Counter #(DIM_BITS) col(.clk(clk),
                             .en(col_en),
@@ -51,7 +52,7 @@ module row_mac
 
     always_ff @(posedge clk, negedge reset_n) begin
         if (~reset_n) curr_state <= INIT;
-        else          curr_state <= next_state; 
+        else          curr_state <= next_state;
     end
 
     assign last_col = (B_col == (DIM - 1)); // TODO: or is it B_col == DIM?
@@ -133,13 +134,13 @@ module temporal_mxu
     generate
         for (k = 0; k < DIM; k++) begin: MACs
             row_mac #(.DIM(DIM), .DIM_BITS(DIM_BITS), .BIT_WIDTH(BIT_WIDTH), .OUT_BIT_WIDTH(OUT_BIT_WIDTH))
-                    (.clk(clk),
-                     .reset_n(reset_n),
-                     .A_row(A[k]),
-                     .B_trans(B_trans),
-                     .start(start),
-                     .out_row(mac_out[k]),
-                     .done(done[k]));
+                    row(.clk(clk),
+                        .reset_n(reset_n),
+                        .A_row(A[k]),
+                        .B_trans(B_trans),
+                        .start(start),
+                        .out_row(mac_out[k]),
+                        .done(done[k]));
 
             // Store results in registers
             always_ff @(posedge clk) begin
@@ -148,7 +149,7 @@ module temporal_mxu
                 else
                     out[k] <= out[k];
             end
-        end: macs
+        end: MACs
     endgenerate
 
     always_ff @(posedge clk, negedge reset_n) begin
