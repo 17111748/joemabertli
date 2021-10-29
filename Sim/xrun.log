@@ -1,5 +1,5 @@
 xrun: 19.03-s010: (c) Copyright 1995-2019 Cadence Design Systems, Inc.
-TOOL:	xrun	19.03-s010: Started on Oct 29, 2021 at 01:45:57 EDT
+TOOL:	xrun	19.03-s010: Started on Oct 29, 2021 at 02:09:45 EDT
 xrun
 	-f sim.args
 		-clean
@@ -116,17 +116,85 @@ file: ../Src/unary_binary_mxu_tb.sv
 		unary_binary_mxu_tb
 		Caching library 'worklib' ....... Done
 xmelab: *W,DSEMEL: This SystemVerilog design will be simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
-                        dut.intermediate_data_cur[1][0], dut.intermediate_data_cur[1][1],
-                                                    |
-xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,56|52): Hierarchical name component lookup failed at 'intermediate_data_cur'.
-                        dut.intermediate_data_cur[1][0], dut.intermediate_data_cur[1][1],
-                                                                                     |
-xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,56|85): Hierarchical name component lookup failed at 'intermediate_data_cur'.
-                        dut.intermediate_data_cur[2][0], dut.intermediate_data_cur[2][1],
-                                                    |
-xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,57|52): Hierarchical name component lookup failed at 'intermediate_data_cur'.
-                        dut.intermediate_data_cur[2][0], dut.intermediate_data_cur[2][1],
-                                                                                     |
-xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,57|85): Hierarchical name component lookup failed at 'intermediate_data_cur'.
-xrun: *E,ELBERR: Error during elaboration (status 1), exiting.
-TOOL:	xrun	19.03-s010: Exiting on Oct 29, 2021 at 01:45:58 EDT  (total: 00:00:01)
+                        .out_row(mac_out[k]),
+                                       |
+xmelab: *W,CUVMPW (../Src/unary_binary_mxu.sv,142|39): port sizes differ in port connection (8/16).
+                                                         .out(mac_out));
+                                                                    |
+xmelab: *W,CUVMPW (../Src/unary_binary_mxu.sv,36|68): port sizes differ in port connection (8/10).
+                        .out_row(mac_out[k]),
+                                       |
+xmelab: *W,CUVMPW (../Src/unary_binary_mxu.sv,142|39): port sizes differ in port connection (8/16).
+                                                         .out(mac_out));
+                                                                    |
+xmelab: *W,CUVMPW (../Src/unary_binary_mxu.sv,36|68): port sizes differ in port connection (8/10).
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.adder_tree:sv <0x484e7487>
+			streams:   1, words:   168
+		worklib.adder_tree:sv <0x53fb8ea0>
+			streams:   1, words:   149
+		worklib.adder_tree:sv <0x2d2eb0e1>
+			streams:   4, words:  1071
+		worklib.adder_tree:sv <0x3b91c7c4>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x21855319>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x5e449bf5>
+			streams:   1, words:   195
+		worklib.adder_tree:sv <0x66cdd27e>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x16b45a3b>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x7b98b25b>
+			streams:   4, words:  1097
+		worklib.Counter:sv <0x0a630ee9>
+			streams:   2, words:   425
+		worklib.Counter:sv <0x70b1b53d>
+			streams:   2, words:   439
+		worklib.unary_binary_mxu_tb:sv <0x480e0a1a>
+			streams:  14, words: 10306
+		worklib.temporal_mxu:sv <0x27076a05>
+			streams:   9, words:  2836
+		worklib.unary_binary_MAC:sv <0x55b57016>
+			streams:  20, words:  4978
+		worklib.row_mac:sv <0x5f1bd484>
+			streams:  14, words:  6071
+		worklib.separate:sv <0x75afafda>
+			streams:  10, words:  2798
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                 Instances  Unique
+		Modules:                48       7
+		Registers:             161      44
+		Scalar wires:          125       -
+		Expanded wires:         80       3
+		Vectored wires:        119       -
+		Always blocks:          47      13
+		Initial blocks:          3       3
+		Cont. assignments:     108       9
+		Pseudo assignments:     83      41
+		Simulation timescale:  1ps
+	Writing initial simulation snapshot: worklib.unary_binary_mxu_tb:sv
+Loading snapshot worklib.unary_binary_mxu_tb:sv .................... Done
+xmsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+xcelium> source /afs/ece.cmu.edu/support/cds/share/image/usr/cds/xcelium-19.03.010/tools/xcelium/files/xmsimrc
+xcelium> # file path to dump vcd
+xcelium> database -open -vcd dump -into ./unary_binary.vcd
+Created VCD database dump
+xcelium> # change design.DUT name to top level name
+xcelium> probe -create unary_binary_mxu_tb.dut -depth to_cells  -vcd -all -database dump -all -memories
+Created probe 1
+xcelium> run
+
+Start Testing
+
+                   0 
+		     C[0][0]:       %b, C[0][1]:       %b 
+		     C[1][0]:       %b, C[1][1]:       %b
+		     out_valid:  %b  x  x  x  x0
+Simulation complete via $finish(1) at time 1015 NS + 0
+../Src/unary_binary_mxu_tb.sv:197         $finish; 
+xcelium> exit
+TOOL:	xrun	19.03-s010: Exiting on Oct 29, 2021 at 02:09:47 EDT  (total: 00:00:02)
