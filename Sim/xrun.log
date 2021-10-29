@@ -1,0 +1,132 @@
+xrun: 19.03-s010: (c) Copyright 1995-2019 Cadence Design Systems, Inc.
+TOOL:	xrun	19.03-s010: Started on Oct 29, 2021 at 01:45:57 EDT
+xrun
+	-f sim.args
+		-clean
+		-ieee1364
+		-v93
+		-nospecify
+		-timescale 1ns/1ps
+		-mess
+		-access +rwc
+		-sv
+		../Src/unary_binary_mac.sv
+		../Src/unary_binary_mxu.sv
+		../Src/unary_binary_mxu_tb.sv
+	-input vcd_dump.tcl
+xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
+file: ../Src/unary_binary_mac.sv
+  (input  logic en, clear, clk, 
+                 |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,6|17): Implicit net port (en) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+  (input  logic en, clear, clk, 
+                        |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,6|24): Implicit net port (clear) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+  (input  logic en, clear, clk, 
+                             |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,6|29): Implicit net port (clk) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.Counter:sv
+		errors: 0, warnings: 3
+    (input  logic [NUM_ELEMENTS-1:0] in,
+                                      |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,20|38): Implicit net port (in) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.adder_tree:sv
+		errors: 0, warnings: 1
+    (input  logic clk, 
+                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,65|20): Implicit net port (clk) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic reset_n, 
+                        |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,66|24): Implicit net port (reset_n) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic valid, // Start of when the input signal should be grabbed.
+                      |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,67|22): Implicit net port (valid) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [SIZE-1:0] a, 
+                             |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,68|29): Implicit net port (a) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [SIZE-1:0] b, 
+                             |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,69|29): Implicit net port (b) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [SIZE:0]   counter_out, 
+                                       |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,70|39): Implicit net port (counter_out) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.separate:sv
+		errors: 0, warnings: 6
+    (input  logic clk, 
+                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,125|20): Implicit net port (clk) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic reset_n, 
+                        |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,126|24): Implicit net port (reset_n) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic valid, // Start of when the input signal should be grabbed.
+                      |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,127|22): Implicit net port (valid) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [(SETS*SIZE)-1:0] a, 
+                                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,128|36): Implicit net port (a) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [(SETS*SIZE)-1:0] b, 
+                                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mac.sv,129|36): Implicit net port (b) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.unary_binary_MAC:sv
+		errors: 0, warnings: 5
+file: ../Src/unary_binary_mxu.sv
+    (input  logic clk,
+                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,9|20): Implicit net port (clk) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic reset_n,
+                        |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,10|24): Implicit net port (reset_n) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [DIM-1:0][BIT_WIDTH-1:0] A_row,
+                                               |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,11|47): Implicit net port (A_row) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [DIM-1:0][DIM-1:0][BIT_WIDTH-1:0] B_trans,
+                                                          |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,12|58): Implicit net port (B_trans) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic start,
+                      |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,13|22): Implicit net port (start) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.row_mac:sv
+		errors: 0, warnings: 5
+    (input  logic clk,
+                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,112|20): Implicit net port (clk) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic reset_n,
+                        |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,113|24): Implicit net port (reset_n) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [DIM-1:0][DIM-1:0][BIT_WIDTH-1:0] A,
+                                                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,114|52): Implicit net port (A) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [DIM-1:0][DIM-1:0][BIT_WIDTH-1:0] B,
+                                                    |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,115|52): Implicit net port (B) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic start,
+                      |
+xmvlog: *W,NODNTW (../Src/unary_binary_mxu.sv,116|22): Implicit net port (start) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+        end: macs
+                |
+xmvlog: *W,LBLMAT (../Src/unary_binary_mxu.sv,152|16): Label/name mismatch: MACs - macs.
+	module worklib.temporal_mxu:sv
+		errors: 0, warnings: 6
+file: ../Src/unary_binary_mxu_tb.sv
+	module worklib.unary_binary_mxu_tb:sv
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		unary_binary_mxu_tb
+		Caching library 'worklib' ....... Done
+xmelab: *W,DSEMEL: This SystemVerilog design will be simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+                        dut.intermediate_data_cur[1][0], dut.intermediate_data_cur[1][1],
+                                                    |
+xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,56|52): Hierarchical name component lookup failed at 'intermediate_data_cur'.
+                        dut.intermediate_data_cur[1][0], dut.intermediate_data_cur[1][1],
+                                                                                     |
+xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,56|85): Hierarchical name component lookup failed at 'intermediate_data_cur'.
+                        dut.intermediate_data_cur[2][0], dut.intermediate_data_cur[2][1],
+                                                    |
+xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,57|52): Hierarchical name component lookup failed at 'intermediate_data_cur'.
+                        dut.intermediate_data_cur[2][0], dut.intermediate_data_cur[2][1],
+                                                                                     |
+xmelab: *E,CUVUNF (../Src/unary_binary_mxu_tb.sv,57|85): Hierarchical name component lookup failed at 'intermediate_data_cur'.
+xrun: *E,ELBERR: Error during elaboration (status 1), exiting.
+TOOL:	xrun	19.03-s010: Exiting on Oct 29, 2021 at 01:45:58 EDT  (total: 00:00:01)

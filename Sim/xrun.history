@@ -1,0 +1,1 @@
+s1(29Oct2021:01:45:57):  xrun -f sim.args -input vcd_dump.tcl 
