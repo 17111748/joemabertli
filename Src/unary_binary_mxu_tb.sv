@@ -9,7 +9,7 @@ module unary_binary_mxu_tb();
     localparam B_ROW = DIM; 
     localparam B_COL = DIM; 
 
-    logic clk, reset_n, start, output_ready; 
+    logic clk, reset_n, start, out_valid; 
     logic [A_ROW-1:0][A_COL-1:0][BIT_WIDTH-1:0] A; 
     logic [B_ROW-1:0][B_COL-1:0][BIT_WIDTH-1:0] B;
     // logic [A_ROW-1:0][B_COL-1:0][(BIT_WIDTH<<1)+A_COL-1:0] C;  
