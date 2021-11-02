@@ -110,6 +110,26 @@ module mxu_full_tb ();
             A = A_rand.matrix;
             B = B_rand.matrix;
 
+            $write("A = [\n");
+            for(int row = 0; row < `A_N; row++) begin
+                $write("\t");
+                for(int col = 0; col < `B_M; col++) begin
+                    $write("%h ", A[row][col]);
+                end
+                $write("\n");
+            end
+            $write("    ]\n");
+
+            $write("B = [\n");
+            for(int row = 0; row < `A_N; row++) begin
+                $write("\t");
+                for(int col = 0; col < `B_M; col++) begin
+                    $write("%h ", B[row][col]);
+                end
+                $write("\n");
+            end
+            $write("    ]\n");
+
             {a_valid, b_valid} <= 2'b11;
 
             timeout = 0;
@@ -122,6 +142,16 @@ module mxu_full_tb ();
                 timeout++;
                 @(posedge clk);
             end
+
+            $write("Y = [\n");
+            for(int row = 0; row < `A_N; row++) begin
+                $write("\t");
+                for(int col = 0; col < `B_M; col++) begin
+                    $write("%h ", Y[row][col]);
+                end
+                $write("\n");
+            end
+            $write("    ]\n");
 
             check_output();
         end

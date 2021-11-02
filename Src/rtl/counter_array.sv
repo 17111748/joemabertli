@@ -55,15 +55,6 @@ module counter_array #(
                 end
             end
 
-            // counter_to_0 #(.WIDTH(WIDTH)) count0(
-            //     .clk(clk),
-            //     .reset_n(reset_n),
-            //     .x(in_array[i]),
-            //     .load_x(done),
-            //     .en(en),
-            //     .y(counts[i])
-            // );
-
             // if the count is non-zero (or all the bits), output 1
             assign unary_out[i] = |counts[i];
 

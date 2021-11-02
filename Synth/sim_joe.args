@@ -1,0 +1,17 @@
+-clean
+-ieee1364
+-v93
+-nospecify
+-timescale 1ns/1ps
+-mess
+-access +rwc
+-sv
+
+# provide path to rtl file
+
+
+# ../Src/library.sv 
+#../Src/unary_binary_MAC.sv
+#../Src/unary_binary_tb.sv
+../Src/tb/mxu_full_tb.sv
+../Src/rtl/*.sv

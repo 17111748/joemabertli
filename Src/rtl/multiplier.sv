@@ -1,7 +1,7 @@
 
 
 module multiplier #(
-    parameter DIM = 4,
+    parameter DIM = 16,
     parameter WIDTH = 4
 ) (
     input  logic clk,
@@ -28,7 +28,7 @@ module multiplier #(
     logic [DIM-1:0] neg_left;
     logic done_left;
 
-    assign finished = redo;// && done_left;
+    assign finished = redo;
 
     get_index #(.DIM(DIM)) idx(
         .clk(clk),

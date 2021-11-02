@@ -5,6 +5,11 @@ NERD_tree_*
 *.log
 *.wav
 *.key
+*.rpt
+*.svf
+*.vcd
+*.db
+*.sdb
 
 .restartSimSession.tcl.old
 .synopsys_dve_rebuild.tcl
@@ -12,9 +17,12 @@ ucli.key
 simv
 *.bak
 inter.vpd
+**/Sim
+**/asap7_dir
 **/csrc
 **/simv.daidir
 **/DVEfiles
+**/work
 fp_inverse_pkg.sv
 wavetable_pkg.sv
 
