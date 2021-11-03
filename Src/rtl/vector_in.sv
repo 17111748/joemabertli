@@ -4,7 +4,6 @@ module get_index #(
     input  logic clk,
     input  logic reset_n,
     input  logic done,
-    input  logic finished,
     output logic redo,
     output logic [$clog2(DIM+1)-1:0] index
 );
@@ -13,9 +12,6 @@ module get_index #(
 
     always_ff @(posedge clk or negedge reset_n) begin
         if (~reset_n) begin
-            index <= 'b0;
-        end
-        else if (finished) begin
             index <= 'b0;
         end
         else if (redo) begin
@@ -34,7 +30,6 @@ module vector_in #(
     parameter ROW = 1
 ) (
     input  logic [DIM-1:0][DIM-1:0][WIDTH-1:0] in,
-    input  logic redo,
     input  logic [$clog2(DIM+1)-1:0] index,
     output logic [DIM-1:0][WIDTH-1:0] in_array
 );

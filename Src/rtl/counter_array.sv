@@ -2,7 +2,8 @@
 
 module counter_array #(
     parameter DIM = 4,
-    parameter WIDTH = 8
+    parameter WIDTH = 8,
+    parameter ROW = 1
 ) (
     input  logic clk,
     input  logic reset_n,
@@ -16,6 +17,8 @@ module counter_array #(
 
     logic [DIM-1:0][WIDTH-1:0] counts;
     logic [DIM-1:0][WIDTH-1:0] prev_arr;
+
+    logic started;
 
     // TODO consider doing ~|counts
     assign done = (counts == 0);
@@ -40,7 +43,14 @@ module counter_array #(
                     counts[i] <= 'b0;
                 end
                 else if (save) begin
-                    counts[i] <= in_array[i];
+                    if (ROW) begin
+                        counts[i] <= in_array[i];
+                    end
+                    else begin
+                        if (~started) begin
+                            counts[i] <= in_array[i];
+                        end
+                    end
                 end
                 else if (done) begin
                     counts[i] <= prev_arr[i];
@@ -59,6 +69,21 @@ module counter_array #(
             assign unary_out[i] = |counts[i];
 
         end
+    endgenerate
+
+    generate
+
+        if (~ROW) begin
+            always_ff @(posedge clk or negedge reset_n) begin
+                if (~reset_n) begin
+                    started <= 1'b0;
+                end
+                else if (done) begin
+                    started <= 1'b1;
+                end
+            end
+        end
+
     endgenerate
 
 endmodule : counter_array
