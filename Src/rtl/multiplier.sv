@@ -1,5 +1,3 @@
-
-
 module multiplier #(
     parameter DIM = 16,
     parameter WIDTH = 4
@@ -29,15 +27,7 @@ module multiplier #(
 
     logic [31:0] count;
 
-    // get_index #(.DIM(DIM)) idx(
-    //     .clk(clk),
-    //     .reset_n(reset_n),
-    //     .done(done_left),
-    //     .redo(finished),
-    //     .index(index)
-    // );
-
-    assign finished = (&done_left || (count > 32'd500)) && (count > 32'd3);
+    assign finished = &done_left && |count;
 
     genvar d;
     generate

@@ -77,7 +77,7 @@ module mxu_full_tb ();
     endfunction
 
     task check_output();
-        logic [`A_N - 1:0][`B_M - 1:0][`BITWIDTH - 1:0] correct;
+        logic [`A_N - 1:0][`B_M - 1:0][2*`BITWIDTH - 1:0] correct;
         correct = matrix_multiply();
 
         for(int row = 0; row < `A_N; row++) begin
@@ -96,6 +96,9 @@ module mxu_full_tb ();
     endtask
 
     initial begin
+        $dumpfile("parallel_counter.vcd");
+        $dumpvars(0, mxu_full_tb);
+
         reset();
 
         for(i = 0; i < `TEST_CASES; i++) begin
@@ -153,7 +156,7 @@ module mxu_full_tb ();
             end
             $write("    ]\n");
 
-            check_output();
+            // check_output();
         end
 
         @(posedge clk);
