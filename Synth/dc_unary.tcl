@@ -10,7 +10,7 @@ set symbol_library "NangateOpenCellLibrary_typical_ccs.sdb";
 #set link_library {"*" cmulib18.db dw_foundation.sldb}
 #set synlib_wait_for_design_license {DesignWare-Foundation}
 
-#set link_library "NangateOpenCellLibrary_typical_ccs.db"; 
+#set link_library "NangateOpenCellLibrary_typical_ccs.db";
 
 # generate reports and save them to a file
 set AREA_RPT ./area.rpt
@@ -18,7 +18,7 @@ set TIME_RPT ./time.rpt
 set POWER_RPT ./power.rpt
 
 # Small loop to read in several files
-set all_files {unary_multiplier.sv}
+set all_files {../Src/unary_multiplier.sv}
 foreach file $all_files {
   set module_source "./$file"
   set both "{$module_source}"
@@ -30,7 +30,7 @@ foreach file $all_files {
 #analyze -f verilog ./gatelib.v
 
 # to avoid 'assign' statements
-set_fix_multiple_port_nets -all -buffer_constants 
+set_fix_multiple_port_nets -all -buffer_constants
 
 #Specify top-level module name
 current_design temporal_mxu

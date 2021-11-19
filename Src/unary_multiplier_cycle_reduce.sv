@@ -1,238 +1,246 @@
-// `default_nettype none 
+// `default_nettype none
 // `timescale 1ns/1ps
 
 
 
-// TODO: Don't wait on 2^b cycles 
-// TODO: Change unary to radix 2 
-// TODO: Wallace Tree for the Adder Tree 
+// TODO: Don't wait on 2^b cycles
+// TODO: Change unary to radix 2
+// TODO: Wallace Tree for the Adder Tree
 
 module temporal_mxu #(
-    parameter DIM = 16, 
+    parameter DIM = 16,
     parameter BIT_WIDTH = 4,
-    parameter OUT_BIT_WIDTH = 2 * BIT_WIDTH,  
-    parameter SIZE = BIT_WIDTH-1, 
+    parameter OUT_BIT_WIDTH = 2 * BIT_WIDTH,
+    parameter SIZE = BIT_WIDTH-1,
     parameter A_ROW = DIM,
     parameter A_ROW_SIZE = $clog2(A_ROW) + 1, // bit width of A_ROW; TODO: clog2 gives the ceiling of log2(x), but in the case of x = power of 2, we need one more bit
     parameter A_COL = A_ROW,
-    parameter B_ROW = A_COL,  
-    parameter B_COL = A_ROW 
+    parameter B_ROW = A_COL,
+    parameter B_COL = A_ROW
 )(
-    input  logic clk, 
-    input  logic reset_n, 
-    input  logic start, 
-    input  logic [A_ROW-1:0][A_COL-1:0][BIT_WIDTH-1:0] A, 
-    input  logic [B_ROW-1:0][B_COL-1:0][BIT_WIDTH-1:0] B, 
-    output logic out_valid, 
+    input  logic clk,
+    input  logic reset_n,
+    input  logic start,
+    input  logic [BIT_WIDTH-1:0] alpha,
+    input  logic [A_ROW-1:0][A_COL-1:0][BIT_WIDTH-1:0] A,
+    input  logic [B_ROW-1:0][B_COL-1:0][BIT_WIDTH-1:0] B,
+    output logic out_valid,
     output logic [A_ROW-1:0][B_COL-1:0][(BIT_WIDTH<<1)-1:0] out
-);    
-    logic [BIT_WIDTH-1:0] counter_out; 
-    logic [A_COL-1:0][BIT_WIDTH-1:0] A_comparator_in; // Magnitude of the inputs coming in 
-    logic [A_COL-1:0] A_is_negative; // Signed bit of the inputs coming in 
-    logic [B_ROW-1:0] unary_A_comparator_out; 
+);
+    logic [BIT_WIDTH-1:0] counter_alpha_out;
+    logic [BIT_WIDTH-1:0] counter_out;
+    logic [A_COL-1:0][BIT_WIDTH-1:0] A_comparator_in; // Magnitude of the inputs coming in
+    logic [A_COL-1:0] A_is_negative; // Signed bit of the inputs coming in
+    logic [B_ROW-1:0] unary_A_comparator_out;
 
     logic data_clk; // asserts high 2^b + constant clock cycles
     assign data_clk = (counter_out == 0);
-    logic [A_ROW_SIZE+1:0] data_clk_count; 
+    logic [A_ROW_SIZE+1:0] data_clk_count;
 
-    logic all_zero; 
+    logic all_zero;
     assign all_zero = (unary_A_comparator_out == 0);
 
-    assign out_valid = data_clk && (data_clk_count == (A_COL)); 
+    assign out_valid = data_clk && (data_clk_count == (A_COL));
 
+    logic counter_alpha_clear;
+    assign counter_alpha_clear = ~reset_n || start || all_zero || (counter_alpha_out == alpha);
 
-    logic counter_clear; 
-    assign counter_clear = ~reset_n || start || all_zero; 
+    logic counter_clear, counter_en;
+    assign counter_clear = ~reset_n || start || all_zero;
+    assign counter_en = (counter_alpha_out == (alpha - BIT_WIDTH'('d1)));
 
-    logic data_counter_clear; 
-    assign data_counter_clear = ~reset_n || start; 
+    logic data_counter_clear;
+    assign data_counter_clear = ~reset_n || start;
 
-    Counter #(.WIDTH(BIT_WIDTH)) counter_A(.en(1'b1), .clear(counter_clear), .clk(clk), .Q(counter_out)); 
+    Counter #(.WIDTH(BIT_WIDTH)) counter_alpha(.en(1'b1), .clear(counter_alpha_clear), .clk(clk), .Q(counter_alpha_out));
+    Counter #(.WIDTH(BIT_WIDTH)) counter_A(.en(counter_en), .clear(counter_clear), .clk(clk), .Q(counter_out));
     Counter #(.WIDTH(A_ROW_SIZE+2)) counter_data_clk(.en(1'b1), .clear(data_counter_clear), .clk(data_clk), .Q(data_clk_count));
 
-    genvar i; 
-    generate 
-        for (i = 0; i < A_COL; i=i+1) begin 
-            Comparator #(.WIDTH(BIT_WIDTH)) comparator_A(.counter(counter_out), .A(A_comparator_in[i]), .out(unary_A_comparator_out[i]));  
-        end 
+    genvar i;
+    generate
+        for (i = 0; i < A_COL; i=i+1) begin
+            Comparator #(.WIDTH(BIT_WIDTH)) comparator_A(.counter(counter_out), .A(A_comparator_in[i]), .out(unary_A_comparator_out[i]));
+        end
     endgenerate
 
-    logic [A_ROW_SIZE+1:0] data_clk_count_B_max; // Prevents B from indexing out of bounds 
-    assign data_clk_count_B_max = (data_clk_count < B_ROW) ? data_clk_count + 1 : B_ROW; 
-        
-    // Instantiate the unary binary nodes (B)
-    genvar c_row, c_col; 
-    generate 
-        for (c_row = 0; c_row < A_ROW; c_row=c_row+1) begin 
-            for (c_col = 0; c_col < B_COL; c_col=c_col+1) begin 
-                unary_binary_node #(.BIT_WIDTH(BIT_WIDTH), 
-                                    .A_ROW(A_ROW), 
-                                    .A_COL(A_COL), 
-                                    .B_ROW(B_ROW), 
-                                    .B_COL(B_COL)) 
-                unary_binary_nodes (.clk(clk), 
-                                    .reset_n(reset_n), 
-                                    .start(start), 
-                                    .unary_A(unary_A_comparator_out[c_row]), 
-                                    .AisNegative(A_is_negative[c_row]), 
-                                    .B(B[(B_ROW - data_clk_count_B_max)][c_col]),  
-                                    .out(out[c_row][c_col])); 
-            end 
-        end 
-    endgenerate 
+    logic [A_ROW_SIZE+1:0] data_clk_count_B_max; // Prevents B from indexing out of bounds
+    assign data_clk_count_B_max = (data_clk_count < B_ROW) ? data_clk_count + 1 : B_ROW;
 
-    
+    // Instantiate the unary binary nodes (B)
+    genvar c_row, c_col;
+    generate
+        for (c_row = 0; c_row < A_ROW; c_row=c_row+1) begin
+            for (c_col = 0; c_col < B_COL; c_col=c_col+1) begin
+                unary_binary_node #(.BIT_WIDTH(BIT_WIDTH),
+                                    .A_ROW(A_ROW),
+                                    .A_COL(A_COL),
+                                    .B_ROW(B_ROW),
+                                    .B_COL(B_COL))
+                unary_binary_nodes (.clk(clk),
+                                    .reset_n(reset_n),
+                                    .start(start),
+                                    .unary_A(unary_A_comparator_out[c_row]),
+                                    .AisNegative(A_is_negative[c_row]),
+                                    .B(B[(B_ROW - data_clk_count_B_max)][c_col]),
+                                    .out(out[c_row][c_col]));
+            end
+        end
+    endgenerate
+
+
 
 
     // Combinational logic with clocking to determine A_comparator_in (systolic flow into the comparator)
-    // Scheduling the A as inputs 
-    always_comb begin 
-        if (~reset_n) begin 
+    // Scheduling the A as inputs
+    always_comb begin
+        if (~reset_n) begin
             for (int j = 0; j < A_COL; j=j+1) begin
                 A_comparator_in[j] = 0;
-                A_is_negative[j] = 1'b0; 
-            end 
-        end
-        else if (start) begin 
-            for (int j = 0; j < A_COL; j=j+1) begin
-                A_comparator_in[j] = 0;
-                A_is_negative[j] = 1'b0; 
-            end 
-        end 
-        else if (data_clk_count < A_ROW) begin  
-            for (int j = 0; j < A_ROW; j=j+1) begin 
-                if (A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1]) begin 
-                    A_comparator_in[j] = ~(A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1:0]) + 1; 
-                    A_is_negative[j] = A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1]; 
-                end 
-                else begin 
-                    A_comparator_in[j] = A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1:0]; 
-                    A_is_negative[j] = A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1]; 
-                end 
+                A_is_negative[j] = 1'b0;
             end
-        end  
-        else begin 
+        end
+        else if (start) begin
             for (int j = 0; j < A_COL; j=j+1) begin
                 A_comparator_in[j] = 0;
-                A_is_negative[j] = 1'b0; 
-            end 
-        end 
-    end 
+                A_is_negative[j] = 1'b0;
+            end
+        end
+        else if (data_clk_count < A_ROW) begin
+            for (int j = 0; j < A_ROW; j=j+1) begin
+                if (A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1]) begin
+                    A_comparator_in[j] = ~(A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1:0]) + 1;
+                    A_is_negative[j] = A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1];
+                end
+                else begin
+                    A_comparator_in[j] = A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1:0];
+                    A_is_negative[j] = A[j][(A_ROW - data_clk_count - 1)][BIT_WIDTH-1];
+                end
+            end
+        end
+        else begin
+            for (int j = 0; j < A_COL; j=j+1) begin
+                A_comparator_in[j] = 0;
+                A_is_negative[j] = 1'b0;
+            end
+        end
+    end
 
-endmodule 
+endmodule
 
 
-// unary_binary_node that has the AND gates and adder tree 
+// unary_binary_node that has the AND gates and adder tree
 module unary_binary_node #(
-    parameter BIT_WIDTH = 4, 
-    parameter SIZE = BIT_WIDTH-1, 
+    parameter BIT_WIDTH = 4,
+    parameter SIZE = BIT_WIDTH-1,
     parameter A_ROW = 8,
     parameter A_COL = 8,
-    parameter B_ROW = A_COL,  
-    parameter B_COL = 8 
+    parameter B_ROW = A_COL,
+    parameter B_COL = 8
 ) (
-    input  logic clk, 
-    input  logic reset_n, 
-    input  logic start, 
-    input  logic unary_A, 
-    input  logic AisNegative, 
+    input  logic clk,
+    input  logic reset_n,
+    input  logic start,
+    input  logic unary_A,
+    input  logic AisNegative,
     input  logic [BIT_WIDTH-1:0] B, // TODO: ensure this is always_asserted
-    output logic [(BIT_WIDTH<<1)-1:0] out 
-); 
+    output logic [(BIT_WIDTH<<1)-1:0] out
+);
 
-    logic [(1<<SIZE)-1:0] unary_out; 
+    logic [(1<<SIZE)-1:0] unary_out;
     assign unary_out[(1<<SIZE)-1] = 1'b0;
 
-    logic [SIZE-1:0] translated_B; // Convert to Signed Magnitude 
-    assign translated_B = (B[BIT_WIDTH-1]) ? (~(B[BIT_WIDTH-2:0]) + 1) : B[BIT_WIDTH-2:0]; 
+    logic [SIZE-1:0] translated_B; // Convert to Signed Magnitude
+    assign translated_B = (B[BIT_WIDTH-1]) ? (~(B[BIT_WIDTH-2:0]) + 1) : B[BIT_WIDTH-2:0];
 
-    // Mask the Fanned Out unary inputs with the bits of a binary number 
-    genvar i; 
-    generate 
-        for(i = 1; i < (1<<SIZE); i=i+1) begin 
+    // Mask the Fanned Out unary inputs with the bits of a binary number
+    genvar i;
+    generate
+        for(i = 1; i < (1<<SIZE); i=i+1) begin
             assign unary_out[i-1] = unary_A & translated_B[$clog2(i+1)-1]; // Masking it with the second input
         end
-    endgenerate  
+    endgenerate
 
-    logic [$clog2((1<<SIZE)+1)-1:0] adder_tree_out; 
+    logic [$clog2((1<<SIZE)+1)-1:0] adder_tree_out;
     adder_tree #(.NUM_ELEMENTS((1<<SIZE))) at (.in(unary_out), .sum(adder_tree_out));
 
-    always_ff@(posedge clk, negedge reset_n) begin 
-        if (~reset_n) begin  
-            out <= 1'b0; 
-        end 
-        else if (start) begin 
-            out <= 1'b0; 
-        end 
-        else begin 
-            if (B[BIT_WIDTH-1] != AisNegative) begin 
-                out <= out - adder_tree_out; 
-            end 
-            else begin 
-                out <= out + adder_tree_out; 
-            end 
-        end  
-    end 
+    always_ff@(posedge clk, negedge reset_n) begin
+        if (~reset_n) begin
+            out <= 1'b0;
+        end
+        else if (start) begin
+            out <= 1'b0;
+        end
+        else begin
+            if (B[BIT_WIDTH-1] != AisNegative) begin
+                out <= out - adder_tree_out;
+            end
+            else begin
+                out <= out + adder_tree_out;
+            end
+        end
+    end
 
-      
+
 endmodule : unary_binary_node
 
 
 
-module Counter 
-  #(parameter WIDTH = 4) 
-  (input  logic en, 
-   input  logic clear, 
-   input  logic clk, 
+module Counter
+  #(parameter WIDTH = 4)
+  (input  logic en,
+   input  logic clear,
+   input  logic clk,
    output logic [WIDTH-1:0] Q);
 
-   always_ff @(posedge clk, posedge clear) begin  
+   always_ff @(posedge clk, posedge clear) begin
     if(clear)
-      Q <= 0; 
+      Q <= 0;
     else if (en)
-      Q <= Q + 1; 
-    end 
+      Q <= Q + 1;
+    else
+      Q <= Q;
+    end
 
-endmodule : Counter 
+endmodule : Counter
 
-module Counter_to_N 
-  #(parameter WIDTH = 4) 
-  (input  logic en, 
-   input  logic clear, 
-   input  logic clk, 
-   input  logic [31:0] N, 
+module Counter_to_N
+  #(parameter WIDTH = 4)
+  (input  logic en,
+   input  logic clear,
+   input  logic clk,
+   input  logic [31:0] N,
    output logic [WIDTH-1:0] Q);
 
-   always_ff @(posedge clk, posedge clear) begin 
+   always_ff @(posedge clk, posedge clear) begin
     if(clear)
-      Q <= 0; 
-    else if (en) begin 
-      if(Q == N) 
-        Q <= 0; 
-      else 
-        Q <= Q + 1; 
+      Q <= 0;
+    else if (en) begin
+      if(Q == N)
+        Q <= 0;
+      else
+        Q <= Q + 1;
     end
-   end 
+   end
 
-endmodule : Counter_to_N 
+endmodule : Counter_to_N
 
 module Comparator #(
     parameter WIDTH = 4
 ) (
-    input  logic [WIDTH-1:0] counter, 
-    input  logic [WIDTH-1:0] A, 
+    input  logic [WIDTH-1:0] counter,
+    input  logic [WIDTH-1:0] A,
     output logic out
-); 
+);
 
-    assign out = (counter < A); 
+    assign out = (counter < A);
 
-endmodule : Comparator 
+endmodule : Comparator
 
 
 // TODO: Change this to Wallace T
-module adder_tree 
+module adder_tree
     #(parameter NUM_ELEMENTS = 16,  //Should be same number as number of voters
-      parameter INDEX_W = $clog2(NUM_ELEMENTS + 1)) 
+      parameter INDEX_W = $clog2(NUM_ELEMENTS + 1))
     (input  logic [NUM_ELEMENTS-1:0] in,
      output logic [INDEX_W-1:0] sum);
 
