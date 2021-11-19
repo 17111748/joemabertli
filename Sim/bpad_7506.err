@@ -1,0 +1,77 @@
+Operating system: Linux
+                  0.0.0 Linux 3.10.0-1160.36.2.el7.x86_64 #1 SMP Thu Jul 8 02:53:40 UTC 2021 x86_64
+CPU: x86
+     GenuineIntel family 6 model 63 stepping 2
+     1 CPU
+
+GPU: UNKNOWN
+
+Crash reason:  DUMP_REQUESTED
+Crash address: 0xf73601bf
+Process uptime: not available
+
+Thread 0 (crashed)
+ 0  libcbreakpad.so + 0x281bf
+    eip = 0xf73601bf   esp = 0x0083849e   ebp = 0xf642b6a8   ebx = 0xf738f000
+    esi = 0xf738f000   edi = 0xf642b758   eax = 0x00000000   ecx = 0x00000001
+    edx = 0x00000000   efl = 0xf733fd30
+    Found by: given as instruction pointer in context
+ 1  libcbreakpad.so + 0x264b4
+    eip = 0xf735e4b4   esp = 0xf642b6b0   ebp = 0xf642b7f8
+    Found by: previous frame's frame pointer
+ 2  xmsim!vserror + 0x95
+    eip = 0x090ab685   esp = 0xf642b800   ebp = 0xf642baf8
+    Found by: previous frame's frame pointer
+ 3  xmsim!serror + 0x1a
+    eip = 0x090aca4a   esp = 0xf642ba00   ebp = 0xf642baf8   ebx = 0x00000000
+    esi = 0x0a3010d0   edi = 0x08c3e37a
+    Found by: call frame info
+ 4  xmsim!sv_bushandler + 0x91b
+    eip = 0x08535dab   esp = 0xf642ba20   ebp = 0xf642baf8   ebx = 0xfffffa4c
+    esi = 0x0a3010d0   edi = 0x08c3e37a
+    Found by: call frame info
+ 5  linux-gate.so + 0x410
+    eip = 0xf7795410   esp = 0xf642bb00   ebp = 0xf4289c8e   ebx = 0x00000000
+    esi = 0xf4289be5   edi = 0x00000000
+    Found by: call frame info
+ 6  xmsim!dumpsaif_command + 0x266
+    eip = 0x0a3010d0   esp = 0xf642bb1c   ebp = 0xf4289c8e
+    Found by: stack scanning
+
+Loaded modules:
+0x08048000 - 0x0a24afff  xmsim  ???  (main)
+0x0a24c000 - 0x0a385fff  xmsim  ???
+0xf642f000 - 0xf65dbfff  libStrapNC.so  ???
+0xf65e5000 - 0xf6676fff  libdcapi.so  ???
+0xf6678000 - 0xf6877fff  locale-archive  ???
+0xf6878000 - 0xf688efff  libresolv-2.17.so  ???
+0xf6891000 - 0xf6897fff  libnss_dns-2.17.so  ???
+0xf6898000 - 0xf7102fff  passwd  ???
+0xf7103000 - 0xf710cfff  libnss_sss.so.2  ???
+0xf710d000 - 0xf7119fff  libnss_files-2.17.so  ???
+0xf7338000 - 0xf7390fff  libcbreakpad.so  ???  (WARNING: No symbols, libcbreakpad.so, 2DBEE087C52033262309F529EE8323E30)
+0xf739b000 - 0xf755efff  libc-2.17.so  ???
+0xf755f000 - 0xf7562fff  libc-2.17.so  ???
+0xf7566000 - 0xf7581fff  libgcc_s.so.1  ???
+0xf7582000 - 0xf76f8fff  libstdc++.so.6.0.22  ???
+0xf76fd000 - 0xf773efff  libm-2.17.so  ???
+0xf773f000 - 0xf7743fff  libdl-2.17.so  ???
+0xf7744000 - 0xf775cfff  libpthread-2.17.so  ???
+0xf7774000 - 0xf7793fff  libml_uvm.so  ???
+0xf7795000 - 0xf7795fff  linux-gate.so  ???  (WARNING: No symbols, linux-gate.so, D876F9237339B2C8923CB9B4AB46B4DD0)
+0xf7796000 - 0xf77b9fff  ld-2.17.so  ???
+
+******BACKTRACE*****
+vserror [0x90ab685]
+serror [0x90aca4a]
+sv_bushandler [0x8535dab]
+cov_func_psl_freeonexit [0x8c3e37a]
+cover_dump [0x816e772]
+nc_prepare_to_exit [0x80ecfbe]
+sexit [0x9092952]
+ssig_exit [0x909347f]
+sslu_vcd_dump_value [0x87c56d6]
+sslu_vcd_dump_snare [0x87c605f]
+sslu_pvs_xstopchk [0x86943e9]
+sslu_pvs_stopchk [0x869500d]
+******BACKTRACE END*****

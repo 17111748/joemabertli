@@ -1,0 +1,431 @@
+xrun: 19.03-s010: (c) Copyright 1995-2019 Cadence Design Systems, Inc.
+TOOL:	xrun	19.03-s010: Started on Nov 19, 2021 at 01:27:25 EST
+xrun
+	-f sim.args
+		-clean
+		-ieee1364
+		-v93
+		-nospecify
+		-timescale 1ns/1ps
+		-mess
+		-access +rwc
+		-sv
+		../Src/unary_multiplier_cycle_reduce.sv
+		../Src/unary_multiplier_tb.sv
+	-input vcd_dump.tcl
+xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
+xrun: *W,CLEANF: Failed to remove the directory ./xcelium.d.
+file: ../Src/unary_multiplier_cycle_reduce.sv
+	module worklib.temporal_mxu:sv
+		errors: 0, warnings: 0
+	module worklib.unary_binary_node:sv
+		errors: 0, warnings: 0
+	module worklib.Counter:sv
+		errors: 0, warnings: 0
+	module worklib.Counter_to_N:sv
+		errors: 0, warnings: 0
+	module worklib.Comparator:sv
+		errors: 0, warnings: 0
+	module worklib.adder_tree:sv
+		errors: 0, warnings: 0
+file: ../Src/unary_multiplier_tb.sv
+	module worklib.unary_multiplier_tb:sv
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		Counter_to_N
+		unary_multiplier_tb
+		Caching library 'worklib' ....... Done
+xmelab: *W,DSEMEL: This SystemVerilog design will be simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.adder_tree:sv <0x67c2f6ba>
+			streams:   1, words:   168
+		worklib.adder_tree:sv <0x7c770c9d>
+			streams:   1, words:   149
+		worklib.adder_tree:sv <0x02a232dc>
+			streams:   4, words:  1071
+		worklib.adder_tree:sv <0x141d45f9>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x0e09d124>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x54143066>
+			streams:   4, words:  1097
+		worklib.adder_tree:sv <0x4172ea74>
+			streams:   4, words:  1108
+		worklib.adder_tree:sv <0x71c819c8>
+			streams:   1, words:   195
+		worklib.adder_tree:sv <0x49415043>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x3938d806>
+			streams:   4, words:  1069
+		worklib.adder_tree:sv <0x203cc80e>
+			streams:   4, words:  1097
+		worklib.adder_tree:sv <0x3e1d8b4f>
+			streams:   4, words:  1108
+		worklib.adder_tree:sv <0x6c640ded>
+			streams:   4, words:  1117
+		worklib.Comparator:sv <0x71a7bd7e>
+			streams:   1, words:   191
+		worklib.Counter:sv <0x1077c48f>
+			streams:   2, words:   447
+		worklib.Counter:sv <0x56e6fc8b>
+			streams:   2, words:   459
+		worklib.unary_multiplier_tb:sv <0x1b38566a>
+			streams:  14, words: 11754
+		worklib.Counter_to_N:sv <0x62f237b6>
+			streams:   2, words:   504
+		worklib.temporal_mxu:sv <0x197ec358>
+			streams:  25, words: 12194
+		worklib.unary_binary_node:sv <0x63a187e8>
+			streams:   7, words:  2662
+	Loading native compiled code:     .................... Done
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                   Instances  Unique
+		Modules:               16918       7
+		Registers:             42289      40
+		Scalar wires:          42310       -
+		Expanded wires:        32768     256
+		Vectored wires:        42029       -
+		Always blocks:          8453       5
+		Initial blocks:            3       3
+		Cont. assignments:     49688      16
+		Pseudo assignments:    17985      46
+		Simulation timescale:    1ps
+	Writing initial simulation snapshot: worklib.Counter_to_N:sv
+Loading snapshot worklib.Counter_to_N:sv .................... Done
+xmsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+xcelium> source /afs/ece.cmu.edu/support/cds/share/image/usr/cds/xcelium-19.03.010/tools/xcelium/files/xmsimrc
+xcelium> # file path to dump vcd
+xcelium> database -open -vcd dump -into ./unary_multiplier.vcd
+Created VCD database dump
+xcelium> # change design.DUT name to top level name
+xcelium> probe -create unary_multiplier_tb.dut -depth to_cells  -vcd -all -database dump -all -memories
+Created probe 1
+xcelium> run
+
+Start Testing
+
+xmsim: *W,DFUSE: $dumpfile unary_multiplier.vcd is already in use (VCD file).
+            File: ../Src/unary_multiplier_tb.sv, line = 98, pos = 16
+           Scope: unary_multiplier_tb
+            Time: 0 FS + 0
+
+                   0 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  x  0x1    0    0    0    0
+                   1 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  00x    0    0    0    0
+                   3 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  001    1    1    1    1
+                   5 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000    0    0    0    0
+                   7 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100    1    1    1    1
+                   9 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210    2    2    2    2
+                  11 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000    3    3    3    3
+                  13 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100    4    4    4    4
+                  15 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210    5    5    5    5
+                  17 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000    6    6    6    6
+                  19 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100    7    7    7    7
+                  21 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210    8    8    8    8
+                  23 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000    9    9    9    9
+                  25 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   10   10   10   10
+                  27 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   11   11   11   11
+                  29 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   12   12   12   12
+                  31 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   13   13   13   13
+                  33 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   14   14   14   14
+                  35 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   15   15   15   15
+                  37 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   16   16   16   16
+                  39 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   17   17   17   17
+                  41 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   18   18   18   18
+                  43 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   19   19   19   19
+                  45 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   20   20   20   20
+                  47 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   21   21   21   21
+                  49 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   22   22   22   22
+                  51 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   23   23   23   23
+                  53 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   24   24   24   24
+                  55 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   25   25   25   25
+                  57 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   26   26   26   26
+                  59 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   27   27   27   27
+                  61 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   28   28   28   28
+                  63 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   29   29   29   29
+                  65 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   30   30   30   30
+                  67 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   31   31   31   31
+                  69 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   32   32   32   32
+                  71 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   33   33   33   33
+                  73 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   34   34   34   34
+                  75 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   35   35   35   35
+                  77 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   36   36   36   36
+                  79 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   37   37   37   37
+                  81 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   38   38   38   38
+                  83 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   39   39   39   39
+                  85 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   40   40   40   40
+                  87 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   41   41   41   41
+                  89 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   42   42   42   42
+                  91 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   43   43   43   43
+                  93 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   44   44   44   44
+                  95 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  000   45   45   45   45
+                  97 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  100   46   46   46   46
+                  99 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b0  3  210   47   47   47   47
+                 101 out_valid: %b 
+		     alpha: %d 
+		     counter_alpha_out: %d 
+		     counter_en: %d 
+		     counter_alpha_clear: %d 
+		     C[0][0]: %b, C[0][1]: %b, C[1][0]: %b, C[1][1]: %b1  3  001   48   48   48   48
+Simulation complete via $finish(1) at time 103 NS + 0
+../Src/unary_multiplier_tb.sv:228         $finish;
+xcelium> exit
+TOOL:	xrun	19.03-s010: Exiting on Nov 19, 2021 at 01:27:35 EST  (total: 00:00:10)

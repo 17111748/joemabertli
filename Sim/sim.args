@@ -8,9 +8,8 @@
 -sv
 
 # provide path to rtl file
-../Src/unary_binary_mac.sv
-../Src/unary_binary_mxu.sv
-../Src/unary_binary_mxu_tb.sv
+../Src/unary_multiplier_cycle_reduce.sv
+../Src/unary_multiplier_tb.sv
 
 # example = /afs/ece.cmu.edu/usr/pvellais/Private/New_DATE/RTL/tb_std/column_tb_431x2.sv
 
