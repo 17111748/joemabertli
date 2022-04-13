@@ -39,11 +39,11 @@ module tau_mac_tb ();
         #3
         a = 1;
         b = 2;
-        start = 1;
-        @(posedge clk);
-        #3 start = 0;
 
         for(i = 0; i < 5; i++) begin
+            start = 1;
+            @(posedge clk);
+            #3 start = 0;
             while(!mac_valid) begin
                 @(posedge clk);
             end
@@ -55,12 +55,11 @@ module tau_mac_tb ();
         #3
         a = 3;
         b = 1;
-        start = 1;
-        @(posedge clk);
-        #3
-        start = 'b0;
 
         for(i = 0; i < 5; i++) begin
+            start = 1;
+            @(posedge clk);
+            #3 start = 0;
             while(!mac_valid) begin
                 @(posedge clk);
             end
