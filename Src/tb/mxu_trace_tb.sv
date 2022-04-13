@@ -35,6 +35,7 @@ module mxu_tb ();
         .reset_n   (reset_n),
         .in0       (A_in),
         .in1       (B_in),
+        .in_valid  (in_valid),
         .out       (Y),
         .finished  (y_valid)
     );
