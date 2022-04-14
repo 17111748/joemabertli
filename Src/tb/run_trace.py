@@ -32,6 +32,12 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+def write_tb_def(args):
+    s = f'`define DIM {args.N}\n`define BITWIDTH {args.in_bitwidth}\n`define OUT_BITWIDTH {args.out_bitwidth}\n`define TIME_MAX {10000 * args.num_traces}\n`define MAX_TRACES {args.num_traces}\n`define FAIL_ON_ERROR'
+    with open('tb_define.vh', 'w') as f:
+        f.write(s)
+        f.close()
+
 def tc(bin_str, bitwidth, signed):
     x = int(bin_str, 2)
     sign = (x & (2 ** (bitwidth - 1))) == (2 ** (bitwidth - 1))
@@ -79,6 +85,8 @@ if __name__ == "__main__":
     if(args.gui): 
         simv_cmd += " -gui &"
         print("Opening the GUI...")
+    
+    write_tb_def(args)
 
     os.system(simv_cmd)
 

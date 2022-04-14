@@ -157,7 +157,6 @@ module mxu_tb ();
 
                 timeout += 10;
                 @(posedge clk);
-                $display("Time: %0d", $time);
             end
 
             matrix_y_queue.push_back(Y);
