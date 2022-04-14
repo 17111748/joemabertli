@@ -133,8 +133,10 @@ module mxu_tb ();
         $dumpvars(0, mxu_tb);
 
         reset();
+        $display("Parsing trace files...");
         parse_trace();
 
+        $display("Starting test...");
         while(matrix_a_queue.size() > 0) begin
 
             /* Pass inputs */
@@ -147,13 +149,10 @@ module mxu_tb ();
             /* Wait for outputs */
             timeout = 0;
             while(!y_valid) begin
-
-                `ifdef `TIME_MAX
-                if(timeout >= `TIME_MAX) begin
+                if(timeout >= 10) begin
                     $display("Timeout at time %0d. Aborting...", $time);
                     $finish();
                 end
-                `endif // TIME_MAX
 
                 timeout++;
                 @(posedge clk);
@@ -161,6 +160,7 @@ module mxu_tb ();
 
             matrix_y_queue.push_back(Y);
         end
+
 
         write_output();
 

@@ -43,6 +43,8 @@ module gemm_fsm #(
                     start     = 1'b1;
                     counter_d =  'b0;
                 end
+
+                counter_d = counter_q + 'b1;
             end
         endcase
     end

@@ -69,7 +69,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     if(args.compile):
-        exit = os.system("vcs -sverilog -debug_all -j4 +warn=all mxu_trace_tb.sv ../rtl/*.sv")
+        exit = os.system("vcs -sverilog -debug_all -j4 +warn=all mxu_trace_tb.sv ../tau_mac/*.sv")
 
         if(exit != 0):
             sys.exit(exit)
