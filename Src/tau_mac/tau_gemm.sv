@@ -113,9 +113,10 @@ module multiplier #(
 
     always_comb begin
         cycle_counter_d = cycle_counter_q;
+        finished = 1'b0;
 
         if(cycle_counter_q == DIM - 1 && inc_input) begin
-            finished = 'b1;
+            finished = 1'b1;
         end
 
         else if(inc_input) begin
