@@ -129,8 +129,8 @@ module mxu_tb ();
     endfunction
 
     initial begin
-        $dumpfile("mxu.vcd");
-        $dumpvars(0, mxu_tb);
+        //$dumpfile("mxu.vcd");
+        //$dumpvars(0, mxu_tb);
 
         reset();
         $display("Parsing trace files...");
@@ -149,13 +149,15 @@ module mxu_tb ();
             /* Wait for outputs */
             timeout = 0;
             while(!y_valid) begin
-                if(timeout >= 10) begin
+                if(timeout >= `TIME_MAX) begin
                     $display("Timeout at time %0d. Aborting...", $time);
+                    write_output();
                     $finish();
                 end
 
-                timeout++;
+                timeout += 10;
                 @(posedge clk);
+                $display("Time: %0d", $time);
             end
 
             matrix_y_queue.push_back(Y);

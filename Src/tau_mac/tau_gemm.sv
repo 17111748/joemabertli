@@ -14,7 +14,8 @@ module gemm_fsm #(
 
     enum {
         WAIT,
-        COMPUTE
+        COMPUTE,
+        START
     } state_d, state_q;
 
     logic [$clog2(BITWIDTH):0] counter_d, counter_q;
@@ -40,11 +41,18 @@ module gemm_fsm #(
 
                 else if(counter_q >= BITWIDTH) begin
                     inc_input = 1'b1;
-                    start     = 1'b1;
-                    counter_d =  'b0;
+                    state_d   = START;
                 end
 
-                counter_d = counter_q + 'b1;
+                else begin
+                    counter_d = counter_q + 'b1;
+                end
+            end
+
+            START: begin
+                counter_d = 'b0;
+                start     = 1'b1;
+                state_d   = COMPUTE;
             end
         endcase
     end
@@ -69,8 +77,8 @@ module multiplier #(
 )(
     input  logic                                        clk,
     input  logic                                        reset_n,
-    input  logic [DIM - 1:0][DIM - 1:0][WIDTH - 1:0] in0,
-    input  logic [DIM - 1:0][DIM - 1:0][WIDTH - 1:0] in1,
+    input  logic [DIM - 1:0][DIM - 1:0][WIDTH - 1:0]    in0,
+    input  logic [DIM - 1:0][DIM - 1:0][WIDTH - 1:0]    in1,
     input  logic                                        in_valid,
     output logic [DIM - 1:0][DIM - 1:0][OUT_BITS - 1:0] out,
     output logic                                        finished
@@ -110,15 +118,23 @@ module multiplier #(
     endgenerate
 
     logic [$clog2(WIDTH):0] cycle_counter_d, cycle_counter_q;
-    assign active_in0 = in0[cycle_counter_q];
-    assign active_in1 = in1[cycle_counter_q];
+
+    /* Access a column of in0 */
+    generate
+        for(genvar i = 0; i < DIM; i++) begin
+            assign active_in0[i] = in0[i][DIM - cycle_counter_q - 'b1];
+        end
+
+    endgenerate
+    assign active_in1 = in1[DIM - cycle_counter_q - 'b1];
 
     always_comb begin
         cycle_counter_d = cycle_counter_q;
         finished = 1'b0;
 
-        if(cycle_counter_q == DIM - 1 && inc_input) begin
-            finished = 1'b1;
+        if(cycle_counter_q > DIM - 1) begin
+            finished        = 1'b1;
+            cycle_counter_d = 0;
         end
 
         else if(inc_input) begin
@@ -131,8 +147,8 @@ module multiplier #(
             cycle_counter_q <= 'b0;
         end
 
-        else if(inc_input) begin
-            cycle_counter_q <= cycle_counter_q + 'b1;
+        else begin
+            cycle_counter_q <= cycle_counter_d;
         end
     end
 endmodule: multiplier

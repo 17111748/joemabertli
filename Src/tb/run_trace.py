@@ -17,6 +17,7 @@ Ex.
 import os
 import sys
 import argparse
+import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -27,27 +28,25 @@ def parse_args():
     parser.add_argument('--compile', action="store_true")
     parser.add_argument('--N', help="The x and y dimension of the matrices", type=int)
     parser.add_argument('--gui', action="store_true")
+    parser.add_argument('--signed', action="store_true")
     args = parser.parse_args()
     return args
 
-def tc(bin_str, bitwidth):
+def tc(bin_str, bitwidth, signed):
     x = int(bin_str, 2)
     sign = (x & (2 ** (bitwidth - 1))) == (2 ** (bitwidth - 1))
     x_pos = x & (2 ** (bitwidth - 1) - 1)
-    return x_pos + (-1 * sign * 2 ** (bitwidth - 1))
 
-def mmm(A, B, bitwidth):
-    A_n = len(A)
-    A_m = len(A[0])
-    B_m = len(B[0])
-    
-    M = [[0 for i in range(B_m)] for j in range(A_n)]
-    for r in range(A_n):
-        for c in range(B_m):
-            for z in range(A_m):
-                M[r][c] = M[r][c] + A[r][z] * B[z][c]
-            M[r][c] = tc(bin(M[r][c] & int("1" * bitwidth, 2)), bitwidth)
+    if signed:
+        return x_pos + (-1 * sign * 2 ** (bitwidth - 1))
+    else:
+        return x_pos + sign * 2 ** (bitwidth - 1)
 
+def mmm(A, B, bitwidth, signed):
+    A = np.array(A)
+    B = np.array(B)
+    M = np.matmul(A, B)
+    M = np.mod(M, 2 ** bitwidth)
     return M
 
 def matrix_eq(A, B):
@@ -61,8 +60,9 @@ def matrix_eq(A, B):
 
     return True
 
-def print_matrix(A):
-    print('\n'.join([''.join(['{:4}'.format(item) for item in row]) 
+def print_matrix(A, bitwidth):
+    s = '{:' + f'{int(bitwidth / 2)}' + '}'
+    print('\n'.join([''.join([s.format(item) for item in row]) 
       for row in A]))
 
 if __name__ == "__main__":
@@ -101,34 +101,34 @@ if __name__ == "__main__":
             Y.append([])
             A.append([])
             for c in range(args.N):
-                Y[r].append(tc(out_lines[out_count], args.out_bitwidth))
-                A[r].append(tc(in_lines[in_count], args.in_bitwidth))
+                Y[r].append(tc(out_lines[out_count], args.out_bitwidth, args.signed))
+                A[r].append(tc(in_lines[in_count], args.in_bitwidth, args.signed))
                 in_count += 1
                 out_count += 1
 
         for r in range(args.N):
             B.append([])
             for c in range(args.N):
-                B[r].append(tc(in_lines[in_count], args.in_bitwidth))
+                B[r].append(tc(in_lines[in_count], args.in_bitwidth, args.signed))
                 in_count += 1
 
         print("==================================")
         print(f"Trace:\t{t}")
         print("----------------------------------")
         print("A:")
-        print_matrix(A)
+        print_matrix(A, args.out_bitwidth)
         print("----------------------------------")
         print("B:")
-        print_matrix(B)
+        print_matrix(B, args.out_bitwidth)
         print("----------------------------------")
         print("Output:")
-        print_matrix(Y)
+        print_matrix(Y, args.out_bitwidth)
 
-        M = mmm(A, B, args.out_bitwidth)
+        M = mmm(A, B, args.out_bitwidth, args.signed)
 
         if(not matrix_eq(M, Y)):
             print("Test failed. Correct output matrix:")
-            print_matrix(M)
+            print_matrix(M, args.out_bitwidth)
             sys.exit(1)
 
         traces.append({
