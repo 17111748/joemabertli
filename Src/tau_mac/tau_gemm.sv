@@ -62,25 +62,25 @@ endmodule: gemm_fsm
 
 module multiplier #(
     parameter DIM      = 16,
-    parameter BITWIDTH = 8,
-    parameter OUT_BITS = 2 * BITWIDTH
+    parameter WIDTH    = 8,
+    parameter OUT_BITS = 2 * WIDTH
 )(
     input  logic                                        clk,
     input  logic                                        reset_n,
-    input  logic [DIM - 1:0][DIM - 1:0][BITWIDTH - 1:0] in0,
-    input  logic [DIM - 1:0][DIM - 1:0][BITWIDTH - 1:0] in1,
+    input  logic [DIM - 1:0][DIM - 1:0][WIDTH - 1:0] in0,
+    input  logic [DIM - 1:0][DIM - 1:0][WIDTH - 1:0] in1,
     input  logic                                        in_valid,
     output logic [DIM - 1:0][DIM - 1:0][OUT_BITS - 1:0] out,
     output logic                                        finished
 );
 
-    logic [DIM - 1:0][BITWIDTH - 1:0] active_in0;
-    logic [DIM - 1:0][BITWIDTH - 1:0] active_in1;
+    logic [DIM - 1:0][WIDTH - 1:0] active_in0;
+    logic [DIM - 1:0][WIDTH - 1:0] active_in1;
     logic [DIM - 1:0][DIM - 1:0]      mac_valid;
     logic                             start;
     logic                             inc_input;
 
-    gemm_fsm #(.BITWIDTH(BITWIDTH)) fsm (
+    gemm_fsm #(.BITWIDTH(WIDTH)) fsm (
         .clk        (clk),
         .reset_n    (reset_n),
         .in_valid   (in_valid),
@@ -107,7 +107,7 @@ module multiplier #(
     end
     endgenerate
 
-    logic [$clog2(BITWIDTH):0] cycle_counter_d, cycle_counter_q;
+    logic [$clog2(WIDTH):0] cycle_counter_d, cycle_counter_q;
     assign active_in0 = in0[cycle_counter_q];
     assign active_in1 = in1[cycle_counter_q];
 

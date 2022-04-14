@@ -5,8 +5,8 @@
 `define B_M          2
 */
 `define DIM          2
-`define BITWIDTH     4
-`define OUT_BITWIDTH 8
+`define BITWIDTH     8
+`define OUT_BITWIDTH 16
 `define TIME_MAX     1000000
 `define MAX_TRACES   10
 
